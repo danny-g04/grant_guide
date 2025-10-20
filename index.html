@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Budget Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">University Budget System</div>
+    <button class="logout-btn">Logout</button>
+  </header>
+
+  <aside class="sidebar">
+    <ul>
+      <li>🏠</li>
+      <li>📋</li>
+      <li>👥</li>
+      <li>✈️</li>
+      <li>💰</li>
+      <li>⚙️</li>
+    </ul>
+  </aside>
+
+  <main class="content">
+
+    <!-- Step 1 -->
+    <section class="card">
+      <h2>Step 1: Proposal Setup</h2>
+      <form>
+        <label>Proposal Title</label>
+        <input type="text" placeholder="Enter proposal title">
+
+        <label>Principal Investigator</label>
+        <input type="text" placeholder="Select PI">
+
+        <label>Co-PIs</label>
+        <input type="text" placeholder="Add Co-PIs">
+
+        <label>Sponsor</label>
+        <select>
+          <option>NSF</option>
+          <option>NIH</option>
+          <option>Other</option>
+        </select>
+
+        <div class="row">
+          <div>
+            <label>Start Date</label>
+            <input type="date">
+          </div>
+          <div>
+            <label>End Date</label>
+            <input type="date">
+          </div>
+        </div>
+
+        <label><input type="checkbox"> Include Subawards?</label>
+
+        <button type="button">Next: 5-Year Plan</button>
+      </form>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="card">
+      <h2>Step 2: 5-Year Planning</h2>
+      <table>
+        <tr><th>Year</th><th>Personnel</th><th>Students</th><th>Travel</th></tr>
+        <tr><td>Year 1</td><td></td><td></td><td></td></tr>
+        <tr><td>Year 2</td><td></td><td></td><td></td></tr>
+        <tr><td>Year 3</td><td></td><td></td><td></td></tr>
+        <tr><td>Year 4</td><td></td><td></td><td></td></tr>
+        <tr><td>Year 5</td><td></td><td></td><td></td></tr>
+      </table>
+      <button>Generate Detailed Budget</button>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card">
+      <h2>Step 3: Personnel & Students</h2>
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Year 1</th><th>Fringe</th><th>Total</th></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      </table>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="card">
+      <h2>Step 4: Travel</h2>
+      <form>
+        <label>Destination</label>
+        <div class="radio-group">
+          <label><input type="radio" name="travel"> Domestic</label>
+          <label><input type="radio" name="travel"> International</label>
+        </div>
+
+        <label>Duration (days)</label>
+        <input type="number">
+
+        <label>Number of People</label>
+        <input type="number">
+
+        <label>Airfare Estimate</label>
+        <input type="number">
+
+        <label>Lodging Cap</label>
+        <input type="number">
+
+        <label>Per Diem</label>
+        <input type="number">
+
+        <button type="button">Add Travel</button>
+      </form>
+    </section>
+
+    <!-- Step 5 -->
+    <section class="card">
+      <h2>Step 5: Review & Adjust Budget</h2>
+      <div class="accordion">
+        <details><summary>Personnel</summary></details>
+        <details><summary>Tuition</summary></details>
+        <details><summary>Travel</summary></details>
+        <details><summary>F&A</summary></details>
+      </div>
+      <div class="actions">
+        <button>Recalculate</button>
+        <button>Save Draft</button>
+        <button class="export">Export to Excel</button>
+      </div>
+    </section>
+
+    <!-- Step 6 -->
+    <section class="card">
+      <h2>Step 6: Subawards</h2>
+      <table>
+        <tr><th>Institution</th><th>Personnel</th><th>Tuition</th><th>F&A</th><th>Total</th></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      </table>
+      <button>Download Excel Budget</button>
+    </section>
+
+  </main>
+
+</body>
+</html>
