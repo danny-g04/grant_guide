@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS students (
   student_id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   residency_status ENUM('in_state','out_state') NOT NULL,
-  salary_id INT NULL,
+  salary_id INT NULL DEFAULT 3,
   CONSTRAINT fk_students_salary FOREIGN KEY (salary_id) REFERENCES salary(salary_id)
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS tuition_fee_schedules (
 
 CREATE TABLE IF NOT EXISTS travel_profiles (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  trip_type ENUM('domestic','international') NOT NULL,
+  trip_type ENUM('Domestic','International') NOT NULL,
   airfare DECIMAL(10,2) NOT NULL,
   per_diem DECIMAL(10,2) NOT NULL,
   lodging_caps DECIMAL(10,2) NOT NULL
