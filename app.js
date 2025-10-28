@@ -1,6 +1,6 @@
 const API = 'http://localhost:3000';
 
-async function getJSON(url) {
+async function getJSON(url) { // async is is so the page doesn't freeze while fetching stuff
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
   return res.json();
@@ -19,8 +19,8 @@ const state = {
 };
 
 async function loadRefs() {
-    const [fac, stu, trv] = await Promise.all([
-      getJSON(`${API}/faculty`),
+    const [fac, stu, trv] = await Promise.all([ // loads everything at the same time
+      getJSON(`${API}/faculty`), // gets data for all of these for the render functions
       getJSON(`${API}/students`),        // now returns salary + fringe_rate
       getJSON(`${API}/travel-profiles`)
     ]);
@@ -33,8 +33,8 @@ async function loadRefs() {
   // Populate PI and Co-PI selects
   const pi = document.getElementById('pi'); // finds the ID in the html file 
   const co = document.getElementById('coPis');
-  pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join('');
-  co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join('');
+  pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // fills in the options here
+  co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // concatenates
 
   // Build Step 3 rows (note: students now have salary/fringe_rate)
   state.people = [
@@ -66,7 +66,7 @@ async function loadRefs() {
   ).join('<br>');
 }
 
-function renderPeople() {
+function renderPeople() { // This just shows the people on the page
   const tbody = document.getElementById('peopleBody');
   tbody.innerHTML = state.people.map((p,i)=>`
     <tr>
@@ -97,7 +97,8 @@ function addTravelLine() {
   if (!selected) return alert('Pick a travel profile first');
   const prof = state.travelProfiles.find(p=>p.id==selected.value);
   const days = +document.getElementById('days').value || 1;
-  const trips = +document.getElementById('pax').value || 1;
+  const people = +document.getElementById('pax').value || 1;
+  const trips = 1;
 
   state.travelLines.push({
     type: prof.trip_type, trips, days,
@@ -107,7 +108,7 @@ function addTravelLine() {
   calcTotals();
 }
 
-function renderTravel() {
+function renderTravel() { // this just shows the travel on the page
   const tb = document.getElementById('travelBody');
   tb.innerHTML = state.travelLines.map(t=>`
     <tr>
@@ -121,36 +122,41 @@ function renderTravel() {
   `).join('');
 }
 
-function calcTotals() {
-  // salaries (annual, simple year-1 only for MVP)
-  const salary = state.people.reduce((sum,p)=>{
-    const sal = p.base * (p.effort/100); // assuming 12 months worked every year
-    return sum + sal;
-  },0);
 
-  const fringe = state.people.reduce((sum,p)=>{
-    const sal = p.base * (p.effort/100);
-    return sum + sal * (p.fringe || 0);
-  },0);
-
-  const travel = state.travelLines.reduce((sum,t)=>{
-    const perTrip = t.airfare + t.perDiem*t.days + t.lodging*t.days;
-    return sum + perTrip * t.trips;
-  },0);
-
-  // Tuition (hook later—pull from tuition_fee_schedules). For now 0.
-  const tuition = 0;
-
-  const direct = salary + fringe + travel + tuition;
-  const fa = direct * state.faRate;
-  const total = direct + fa;
-
-  document.getElementById('totals').innerHTML = `
-    <p><strong>Direct Costs:</strong> ${fmt(direct)}</p>
-    <p>- Salary: ${fmt(salary)} | Fringe: ${fmt(fringe)} | Travel: ${fmt(travel)} | Tuition: ${fmt(tuition)}</p>
-    <p><strong>F&A (${(state.faRate*100).toFixed(1)}%):</strong> ${fmt(fa)}</p>
-    <p><strong>Total:</strong> ${fmt(total)}</p>
-  `;
+function calcTotals() { // need to seperate travel cost from f and A
+    const n = x => Number(x) || 0;
+  
+    // salaries & fringe
+    const salary = state.people.reduce((sum,p)=> sum + n(p.base)*(n(p.effort)/100), 0);
+    const fringe = state.people.reduce((sum,p)=> {
+      const sal = n(p.base)*(n(p.effort)/100);
+      return sum + sal*n(p.fringe);
+    }, 0);
+  
+    // travel (includes people multiplier)
+    const travel = state.travelLines.reduce((sum,t)=>{
+      const perTrip = n(t.airfare) + (n(t.perDiem)+n(t.lodging))*n(t.days);
+      return sum + perTrip*n(t.trips||1)*n(t.people||1);
+    }, 0);
+  
+    const tuition = 0; // Step 6 will add real tuition later
+  
+    const direct = salary + fringe + travel + tuition;
+  
+    // EXCLUDE travel from F&A base (common policy). Flip to false if your policy differs.
+    const excludeTravelFromFA = true;
+    const faBase = excludeTravelFromFA ? (direct - travel) : direct;
+  
+    const fa    = faBase * state.faRate;
+    const total = direct + fa;
+  
+    document.getElementById('totals').innerHTML = `
+      <p><strong>Direct Costs:</strong> ${fmt(direct)}</p>
+      <p> Salary: ${fmt(salary)} | Fringe: ${fmt(fringe)} | Travel: ${fmt(travel)} | Tuition: ${fmt(tuition)}</p>
+      <p><strong>F&A base:</strong> ${fmt(faBase)}  ${(state.faRate*100).toFixed(1)}%</p>
+      <p><strong>F&A:</strong> ${fmt(fa)}</p>
+      <p><strong>Total:</strong> ${fmt(total)}</p>
+    `;
 }
 
 function saveDraft() {
@@ -195,8 +201,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   loadRefs().then(calcTotals);
 
   document.getElementById('addTravel').addEventListener('click', addTravelLine);
-  document.getElementById('recalc').addEventListener('click', calcTotals);
+  //document.getElementById('recalc').addEventListener('click', calcTotals);
   document.getElementById('save').addEventListener('click', saveDraft);
   document.getElementById('export').addEventListener('click', exportXLSX);
+  document.getElementById('generate').addEventListener('click', generateFromPlan);
   
 });
