@@ -1,120 +1,138 @@
-// Connect to the Database here
-// This is my server using javascript
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Budget Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">Grant Guide</div>
+  </header>
+
+  <aside class="sidebar">
+
+  </aside>
+
+  <main class="content">
+
+    <section class="card">
+      <h2>Step 1: Proposal Setup</h2>
+      <form id="proposalForm">
+        <label>Proposal Title</label>
+        <input id="title" type="text" placeholder="Enter proposal title">
+
+        <label>Principal Investigator</label>
+        <select id="pi"></select> <!--Selecting these IDs will help connect to app.js-->  
+
+        <label>Co-PIs</label>
+        <select id="coPis" multiple></select>
+
+        <div class="row">
+
+        </div>
+
+        <button id="nextPlan" type="button">Next: 5-Year Plan</button>
+      </form>
+    </section>
+
+
+    <section class="card">
+      <h2>Step 2: 5-Year Planning</h2>
+      <table id="planTable">
+        <tr><th>Year</th><th>Personnel</th><th>Students</th><th>Travel</th></tr>
+        <tr><td>
+          Year 1
+        </td>
+        <td contenteditable></td>
+        <td contenteditable>
+        </td>
+        <td contenteditable>
+        </td>
+      </tr>
+        <tr><td>Year 2</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 3</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 4</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 5</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+      </table>
+      <button id="generate">Generate Detailed Budget</button>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card">
+      <h2>Step 3: Personnel & Students</h2>
+      <table id="peopleTable">
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Effort %</th><th>Base</th><th>Fringe%</th></tr>
+        </thead>
+        <tbody id="peopleBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="card">
+      <h2>Step 4: Travel</h2>
+      <form id="travelForm">
+        <label>Destination</label>
+        <div class="radio-group" id="travelProfiles">
+          <!-- radio buttons will be injected from DB -->
+        </div>
+
+        <label>Duration (days)</label>
+        <input id="days" type="number" value="3">
+
+        <label>Number of People</label>
+        <input id="pax" type="number" value="1">
+
+        <button id="addTravel" type="button">Add Travel</button>
+      </form>
+
+      <table id="travelTable">
+        <thead>
+          <tr><th>Type</th><th>Trips</th><th>Days</th><th>Airfare</th><th>Per Diem</th><th>Lodging</th></tr>
+        </thead>
+        <tbody id="travelBody"></tbody>
+      </table>
+    </section>
 
 
 
+    <section class="card" id="tuitionCard">
+      <h2>Step 5: Tuition & Fees</h2>
+      <div id="tuitionControls"></div>
+      <table class="grid"><tbody id="tuitionBody"></tbody></table>
+    </section>
 
 
+    <!-- Step 5 -->
+    <section class="card">
+      <h2>Step 6: Review & Adjust Budget</h2>
+      <div id="totals"></div>
+      <div class="actions">
+       <!-- <button id="recalc">Recalculate</button> -->
+        <button id="save">Save Draft</button>
+        <button id="export" class="export">Export to CSV</button>
+      </div>
+    </section>
 
 
-const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors'); 
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Create a MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root', // Don't know if this will let Danny use the code but we will see
-  password: '', // didn't use a password you just hit enter
-  database: 'budget_path' // 
-});
-
-// Connect to MySQL
-db.connect(err => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err); // Connect first if not then we can't do anything. 
-    return;
-  }
-  console.log('Connected to MySQL Database');
-});
-
-// Example route to test
-app.get('/', (req, res) => {
-  res.send('Server is running!');
-});
+    <section class="card" id="tuitionCard">
+      <h2>Step 7: Subawards</h2>
+      <div id="tuitionControls"></div>
+      <table class="grid"><tbody id="tuitionBody"></tbody></table>
+    </section>
+    
 
 
+  </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
 
-
-
-// Actually query the database
-
-
-
-
-
-
-
-// Joins salary with the students table
-app.get('/students', (req, res) => {
-    const sql = `
-      SELECT s.student_id,
-             s.name,
-             s.residency_status,
-             s.salary_id,
-             sal.salary,         
-             sal.fringe_rate    
-      FROM students s
-      LEFT JOIN salary sal ON sal.salary_id = s.salary_id
-      ORDER BY s.student_id
-    `;
-    db.query(sql, (err, rows) => { 
-      res.json(rows); // do I really need the json will dive deeper into this as we progress
-    });
-  });
-  
-  // Joins faculty with salary id
-app.get('/faculty', (req, res) => {
-    const sql = `
-      SELECT f.faculty_id,
-             f.name,
-             f.role,
-             s.salary,
-             s.fringe_rate
-      FROM faculty f
-      JOIN salary s ON s.salary_id = f.salary_id
-      ORDER BY f.name
-    `;
-    db.query(sql, (err, rows) => {
-      res.json(rows);
-    });
-  });
-  
-  // Travel Profiles
-  app.get('/travel-profiles', (req, res) => {
-    const sql = `
-    SELECT id, 
-      trip_type, 
-      airfare, 
-      per_diem, 
-      lodging_caps 
-    FROM travel_profiles 
-    ORDER BY id
-    `;
-    db.query(sql, (err, rows) => {
-      res.json(rows);
-    });
-  });
-  
-  // app.post is for actually changing the code through inserts and updates in the database
-  app.post('/budgets', (req, res) => {
-    const { title, fa_rate, start_year } = req.body;
-    db.query('INSERT INTO budgets (title, fa_rate, start_year) VALUES (?,?,?)',
-      [title, fa_rate, start_year],
-      (err, result) => { // This is just for all of the errors
-        res.json({ ok:true, budget_id: result.insertId });
-      }
-    );
-  });  
-
-// Start the server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`)); // Should be on localhost3000
 
 
 
