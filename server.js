@@ -1,26 +1,21 @@
 // Connect to the Database here
 // This is my server using javascript
-
-
-
-
-
-
-
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors'); 
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a MySQL connection
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root', // Don't know if this will let Danny use the code but we will see
-  password: '', // didn't use a password you just hit enter
-  database: 'budget_path' // 
+  password: 'aster', // didn't use a password you just hit enter
+  database: 'budget_path'
 });
 
 // Connect to MySQL
@@ -37,17 +32,7 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
-
-
-
-
-
 // Actually query the database
-
-
-
-
-
 
 
 // Joins salary with the students table
@@ -111,11 +96,6 @@ app.get('/faculty', (req, res) => {
       }
     );
   });  
-
-// Start the server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`)); // Should be on localhost3000
-
 
 // Start the server
 const PORT = 3000;

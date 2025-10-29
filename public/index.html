@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Budget Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">Grant Guide</div>
+  </header>
+
+  <main class="content">
+
+    <section class="card">
+      <h2>Step 1: Proposal Setup</h2>
+      <form id="proposalForm">
+        <label>Proposal Title</label>
+        <input id="title" type="text" placeholder="Enter proposal title">
+
+        <label>Principal Investigator</label>
+        <select id="pi"></select> <!--Selecting these IDs will help connect to app.js-->  
+
+        <label>Co-PIs</label>
+        <select id="coPis" multiple></select>
+
+        <div class="row">
+
+        </div>
+      </form>
+    </section>
+
+
+    <section class="card">
+      <h2>Step 2: 5-Year Planning</h2>
+      <table id="planTable">
+        <tr><th>Year</th><th>Staff</th><th>Students</th><th>Travel</th></tr>
+        <tr><td>
+          Year 1
+        </td>
+        <td contenteditable></td>
+        <td contenteditable>
+        </td>
+        <td contenteditable>
+        </td>
+      </tr>
+        <tr><td>Year 2</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 3</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 4</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr><td>Year 5</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+      </table>
+      <button id="generate">Generate Detailed Budget</button>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card">
+      <h2>Step 3: Personnel & Students</h2>
+      <table id="peopleTable">
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Effort %</th><th>Base</th><th>Fringe%</th></tr>
+        </thead>
+        <tbody id="peopleBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="card">
+      <h2>Step 4: Travel</h2>
+      <form id="travelForm">
+        <label>Destination</label>
+        <div class="radio-group" id="travelProfiles">
+          <!-- radio buttons will be injected from DB -->
+        </div>
+
+        <label>Duration (days)</label>
+        <input id="days" type="number" value="1" min="1">
+
+        <label>Number of People</label>
+        <input id="numberpeople" type="number" value="1" min="1">
+
+        <button id="addTravel" type="button">Add Travel</button>
+      </form>
+
+      <table id="travelTable">
+        <thead>
+          <tr><th>Type</th><th>Days</th><th>Airfare</th><th>Per Diem</th><th>Lodging</th><th>Total Per Person</th><th>Trip Total</th> </tr>
+        </thead>
+        <tbody id="travelBody"></tbody>
+      </table>
+    </section>
+
+
+
+    <section class="card" id="tuitionCard">
+      <h2>Step 5: Tuition & Fees</h2>
+      <div id="tuitionControls"></div>
+      <table class="grid"><tbody id="tuitionBody"></tbody></table>
+    </section>
+
+
+    <!-- Step 5 -->
+    <section class="card">
+      <h2>Step 6: Review & Adjust Budget</h2>
+      <div id="totals"></div>
+      <div class="actions">
+       <!-- <button id="recalc">Recalculate</button> -->
+        <button id="save">Save Draft</button>
+        <button id="export" class="export">Export to CSV</button>
+      </div>
+    </section>
+
+
+    <section class="card" id="tuitionCard">
+      <h2>Step 7: Subawards</h2>
+      <div id="tuitionControls"></div>
+      <table class="grid"><tbody id="tuitionBody"></tbody></table>
+    </section>
+    
+
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
+
+
+

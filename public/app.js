@@ -60,11 +60,11 @@ async function loadRefs() {
   // Render travel radio buttons
   const tp = document.getElementById('travelProfiles');
   tp.innerHTML = trv.map(t =>
-    `<label><input type="radio" name="tprof" value="${t.id}">
-      ${t.trip_type} (airfare ${fmt(t.airfare)}, per diem ${fmt(t.per_diem)}, lodging ${fmt(t.lodging_caps)})
-     </label>`
-  ).join('<br>');
-}
+  `<label><input type="radio" name="tprof" value="${t.id}">
+   ${t.trip_type}</label>`
+).join(`<br>`);
+
+} 
 
 function renderPeople() { // This just shows the people on the page
   const tbody = document.getElementById('peopleBody');
@@ -92,16 +92,18 @@ function renderPeople() { // This just shows the people on the page
   });
 }
 
+
+//adds user input from travel section into array
 function addTravelLine() {
   const selected = document.querySelector('input[name="tprof"]:checked');
   if (!selected) return alert('Pick a travel profile first');
   const prof = state.travelProfiles.find(p=>p.id==selected.value);
-  const days = +document.getElementById('days').value || 1;
-  const people = +document.getElementById('pax').value || 1;
+  const days = +document.getElementById('days').value;
+  const people = +document.getElementById('numberpeople').value;
   const trips = 1;
 
   state.travelLines.push({
-    type: prof.trip_type, trips, days,
+    type: prof.trip_type, trips, days, people,
     airfare: prof.airfare, perDiem: prof.per_diem, lodging: prof.lodging_caps
   });
   renderTravel();
@@ -110,16 +112,20 @@ function addTravelLine() {
 
 function renderTravel() { // this just shows the travel on the page
   const tb = document.getElementById('travelBody');
-  tb.innerHTML = state.travelLines.map(t=>`
+  tb.innerHTML = state.travelLines.map(t=>{
+    const TotalPerPerson= (+t.days * +t.perDiem) + (+t.days* +t.lodging) + +t.airfare;
+    const TotalTrip = TotalPerPerson * +t.people;
+    return `
     <tr>
       <td>${t.type}</td>
-      <td>${t.trips}</td>
       <td>${t.days}</td>
       <td>${fmt(t.airfare)}</td>
       <td>${fmt(t.perDiem)}</td>
       <td>${fmt(t.lodging)}</td>
+      <td>${fmt(TotalPerPerson)} </td>
+      <td>${fmt(TotalTrip)}</td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 
