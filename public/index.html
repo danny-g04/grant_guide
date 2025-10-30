@@ -17,18 +17,28 @@
     <section class="card">
       <h2>Step 1: Proposal Setup</h2>
       <form id="proposalForm">
-        <label>Proposal Title</label>
+        <label>Proposal Title</label> <!--Want this to go into excel file once exported-->
         <input id="title" type="text" placeholder="Enter proposal title">
 
-        <label>Principal Investigator</label>
-        <select id="pi"></select> <!--Selecting these IDs will help connect to app.js-->  
 
-        <label>Co-PIs</label>
-        <select id="coPis" multiple></select>
+        <label>Name</label>
+        <input id="Name" type="text" placeholder="Enter name">
+
+    <label>Role</label>
+    <select id="Role">
+          <option value="PI">Principal Investigator (PI)</option>
+          <option value="Co-PI">Co-Principal Investigator (Co-PI)</option>
+          <option value="Staff">Staff</option>
+          <option value="Student">Student</option>
+    </select>
+
+    <button id="addFaculty" type="button">Add Faculty</button>
+    <button id="addStudent" type="button">Add Student</button>
 
         <div class="row">
 
         </div>
+
       </form>
     </section>
 
@@ -68,7 +78,7 @@
     <!-- Step 4 -->
     <section class="card">
       <h2>Step 4: Travel</h2>
-      <form id="travelForm">
+      <form id="travelForm"> 
         <label>Destination</label>
         <div class="radio-group" id="travelProfiles">
           <!-- radio buttons will be injected from DB -->

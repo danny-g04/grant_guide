@@ -6,7 +6,6 @@ async function getJSON(url) { // async is is so the page doesn't freeze while fe
   return res.json();
 }
 
-// need to understand inner html a little bit better
 
 // In-memory selections
 const state = {
@@ -31,10 +30,10 @@ async function loadRefs() {
   
 
   // Populate PI and Co-PI selects
-  const pi = document.getElementById('pi'); // finds the ID in the html file 
-  const co = document.getElementById('coPis');
-  pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // fills in the options here
-  co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // concatenates
+  //const pi = document.getElementById('pi'); // finds the ID in the html file 
+  //const co = document.getElementById('coPis');
+  //pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // fills in the options here
+  //co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // concatenates
 
   // Build Step 3 rows (note: students now have salary/fringe_rate)
   state.people = [
@@ -65,6 +64,72 @@ async function loadRefs() {
 ).join(`<br>`);
 
 } 
+
+  document.getElementById('addStudent').addEventListener('click', async () => {
+    const name = document.getElementById('Name').value.trim();
+    let salary_id = 3;
+    let residency_status = "in_state";
+
+
+    if(!name){
+      alert('Please enter a name');
+      return;
+    }
+    try{
+      const res = await fetch('http://localhost:3000/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, residency_status, salary_id })
+      });
+  
+      if(!res.ok){
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || res.statusText);
+      }
+  
+      await loadRefs();
+    } catch (err) {
+      console.error(err);
+    }
+  
+  
+  });
+
+
+  document.getElementById('addFaculty').addEventListener('click', async () => {
+    const name = document.getElementById('Name').value.trim();
+    const role = document.getElementById('Role').value.trim();
+    if(!name){
+      alert('Please enter a name');
+      return;
+    }
+    let salary_id;
+    if(role == "PI"){
+      salary_id = 1;
+    } else{
+      salary_id = 2;
+    }
+  
+    try{
+      const res = await fetch('http://localhost:3000/faculty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, role, salary_id })
+      });
+  
+      if(!res.ok){
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || res.statusText);
+      }
+  
+      await loadRefs();
+    } catch (err) {
+      console.error(err);
+    }
+  
+  
+  });
+
 
 function renderPeople() { // This just shows the people on the page
   const tbody = document.getElementById('peopleBody');
