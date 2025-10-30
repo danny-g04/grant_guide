@@ -46,7 +46,7 @@ VALUES
   (60000, 36.7, DEFAULT), -- Staff Rates
   (10000, 3.2, 50) /*Student Rates*/;
 
-------------------- Dependent Tables that uses reference tables --------------------------------
+------------------- Dependent Tables that uses reference tables. User inserts data into these tables --------------------------------
 CREATE TABLE
   IF NOT EXISTS faculty (
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
