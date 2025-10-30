@@ -21,11 +21,13 @@ CREATE TABLE IF NOT EXISTS students (
   name VARCHAR(120) NOT NULL,
   residency_status ENUM('in_state','out_state') NOT NULL,
   salary_id INT NULL DEFAULT 3,
+  tuition_id INT NOT NULL,
   CONSTRAINT fk_students_salary FOREIGN KEY (salary_id) REFERENCES salary(salary_id)
+  CONSTRAINT fk_students_tuition FOREIGN KEY (tuition_id) REFERENCES tuition_fee_schedules(tuition_id)
 );
 
 CREATE TABLE IF NOT EXISTS tuition_fee_schedules (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  tuition_id INT AUTO_INCREMENT PRIMARY KEY,
   semester ENUM('fall','spring','summer') NOT NULL,
   residency_status ENUM('in_state','out_state') NOT NULL,
   tuition_semester DECIMAL(10,2) NOT NULL,

@@ -29,13 +29,7 @@ async function loadRefs() {
     state.travelProfiles = trv;
   
 
-  // Populate PI and Co-PI selects
-  //const pi = document.getElementById('pi'); // finds the ID in the html file 
-  //const co = document.getElementById('coPis');
-  //pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // fills in the options here
-  //co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // concatenates
 
-  // Build Step 3 rows (note: students now have salary/fringe_rate)
   state.people = [
     ...fac.map(f => ({
       name:   f.name,
@@ -86,8 +80,10 @@ async function loadRefs() {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || res.statusText);
       }
-  
+      const createdStudent = await res.json();
+      addTuitionRow(createdStudent);
       await loadRefs();
+
     } catch (err) {
       console.error(err);
     }
@@ -130,7 +126,34 @@ async function loadRefs() {
   
   });
 
+function addTuitionRow(createdStudent){
+  const tbody = document.getElementById('tuitionBody');
+  const tr = document.createElement('tr');
+  tr.dataset.studentId = createdStudent.student_id; 
 
+  tr.innerHTML = `
+  <td>${createdStudent.name}</td>
+  <td>
+    <select class="semester">
+      <option value="fall">Fall</option>
+      <option value="spring">Spring</option>
+      <option value="summer">Summer</option>
+    </select>
+  </td>
+  <td>
+    <select class="residency">
+      <option value="in_state" ${createdStudent.residency_status === 'in_state' ? 'selected' : ''}>In-State</option>
+      <option value="out_state" ${createdStudent.residency_status === 'out_state' ? 'selected' : ''}>Out-of-State</option>
+    </select>
+    </td>
+    <td>
+      <button class="saveTuition">Calculate</button>
+    </td>
+    <td class="tuitionCell">—</td>
+  `;
+
+  tbody.appendChild(tr);
+}
 function renderPeople() { // This just shows the people on the page
   const tbody = document.getElementById('peopleBody');
   tbody.innerHTML = state.people.map((p,i)=>`
