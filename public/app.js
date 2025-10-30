@@ -125,8 +125,6 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
   } catch (err) {
     console.error(err);
   }
-
-
 });
 
 
@@ -223,6 +221,12 @@ function addTuitionRow(createdStudent) {
 
   tbody.appendChild(tr);
 }
+
+//Step 5 - Subawards, Allows user to add subaward amount
+function addSubawards(){
+
+}
+
 
 //Step 7 - Review Budget, Gets total from all the different categories and adds it together
 function calcTotals() { // need to seperate travel cost from f and A
