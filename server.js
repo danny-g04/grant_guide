@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root', // Don't know if this will let Danny use the code but we will see
-  password: 'aster', // didn't use a password you just hit enter
+  password: '', // didn't use a password you just hit enter
   database: 'budget_path'
 });
 

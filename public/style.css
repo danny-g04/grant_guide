@@ -104,19 +104,23 @@ label {
   font-size: 500;
 }  
 
-.radio-group label {
-  display: inline-flex;     
-  align-items: center;       
-  margin-right: 15px;        
-  margin-top: 0;             
-}
-
 input, select {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+.subawards input{
+  width: auto;
+}
+
+.sameline label {
+  display: inline-flex;     
+  align-items: center;       
+  margin-right: 15px;        
+  margin-top: 0;             
 }
 
 button {

@@ -18,6 +18,8 @@ const state = {
   faRate: 0.50
 };
 
+
+//-------------------------FUNCTIONS----------------------------------\\
 async function loadRefs() {
     const [fac, stu, trv] = await Promise.all([ // loads everything at the same time
       getJSON(`${API}/faculty`), // gets data for all of these for the render functions
@@ -56,17 +58,16 @@ async function loadRefs() {
 
   renderPeople();
 
-
-  // Render travel radio buttons
+  // Inserts trip types travel buttons
   const tp = document.getElementById('travelProfiles');
   tp.innerHTML = trv.map(t =>
-  `<label><input type="radio" name="tprof" value="${t.id}">
-   ${t.trip_type}</label>`
+  `<label><input type="radio" name="tprof" value="${t.id}"> ${t.trip_type}</label>`
 ).join(`<br>`);
 
 } 
 
-function renderPeople() { // This just shows the people on the page
+//Step 3, creates a table of all the people in the database and allows user to modify their numbers
+function renderPeople() { 
   const tbody = document.getElementById('peopleBody');
   tbody.innerHTML = state.people.map((p,i)=>`
     <tr>
@@ -93,24 +94,24 @@ function renderPeople() { // This just shows the people on the page
 }
 
 
-//adds user input from travel section into array
+//Step 4, adds user input from travel section into array
 function addTravelLine() {
   const selected = document.querySelector('input[name="tprof"]:checked');
   if (!selected) return alert('Pick a travel profile first');
   const prof = state.travelProfiles.find(p=>p.id==selected.value);
   const days = +document.getElementById('days').value;
   const people = +document.getElementById('numberpeople').value;
-  const trips = 1;
 
   state.travelLines.push({
-    type: prof.trip_type, trips, days, people,
+    type: prof.trip_type, days, people,
     airfare: prof.airfare, perDiem: prof.per_diem, lodging: prof.lodging_caps
   });
   renderTravel();
   calcTotals();
 }
 
-function renderTravel() { // this just shows the travel on the page
+//Step4, function calcuates trip total based on user input
+function renderTravel() { 
   const tb = document.getElementById('travelBody');
   tb.innerHTML = state.travelLines.map(t=>{
     const TotalPerPerson= (+t.days * +t.perDiem) + (+t.days* +t.lodging) + +t.airfare;
@@ -128,7 +129,12 @@ function renderTravel() { // this just shows the travel on the page
   `}).join('');
 }
 
+//Step 6, adds subawards if any
+function subawards(){
+  
+}
 
+//Step 7, calculates the total cost of everything
 function calcTotals() { // need to seperate travel cost from f and A
     const n = x => Number(x) || 0;
   
@@ -149,7 +155,7 @@ function calcTotals() { // need to seperate travel cost from f and A
   
     const direct = salary + fringe + travel + tuition;
   
-    // EXCLUDE travel from F&A base (common policy). Flip to false if your policy differs.
+    // EXCLUDE travel from F&A base (common policy).
     const excludeTravelFromFA = true;
     const faBase = excludeTravelFromFA ? (direct - travel) : direct;
   
@@ -165,6 +171,7 @@ function calcTotals() { // need to seperate travel cost from f and A
     `;
 }
 
+//Step 7, saves draft and draft name
 function saveDraft() {
   const title = document.getElementById('title').value || 'Untitled Budget';
   const startYear = (document.getElementById('startDate').value || '2026-01-01').slice(0,4);
@@ -181,8 +188,9 @@ function saveDraft() {
   })
   .catch(e=>alert('Save error: '+e.message));
 }
-function exportXLSX() { // for the excel file
 
+//Step 7, exports it into an excel file
+function exportXLSX() { 
     const rows = [
       ['Name','Role','Effort%','Base','Fringe%'],
       ...state.people.map(p=>[p.name,p.role,p.effort,p.base,(p.fringe*100).toFixed(1)]),
