@@ -6,7 +6,6 @@ async function getJSON(url) { // async is is so the page doesn't freeze while fe
   return res.json();
 }
 
-// need to understand inner html a little bit better
 
 // In-memory selections
 const state = {
@@ -32,13 +31,7 @@ async function loadRefs() {
     state.travelProfiles = trv;
   
 
-  // Populate PI and Co-PI selects
-  const pi = document.getElementById('pi'); // finds the ID in the html file 
-  const co = document.getElementById('coPis');
-  pi.innerHTML = fac.map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // fills in the options here
-  co.innerHTML = fac.filter(f=>f.role!=='PI').map(f=>`<option value="${f.faculty_id}">${f.name} (${f.role})</option>`).join(''); // concatenates
 
-  // Build Step 3 rows (note: students now have salary/fringe_rate)
   state.people = [
     ...fac.map(f => ({
       name:   f.name,

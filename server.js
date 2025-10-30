@@ -35,6 +35,28 @@ app.get('/', (req, res) => {
 // Actually query the database
 
 
+app.post('/faculty', (req, res) => { 
+  const { name, role, salary_id } = req.body;
+  if(!name) return res.status(400).json({error: 'Name is required'});
+
+    const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
+    db.query(sql, [name, role, salary_id], (err, result) => {
+      res.status(201).json({ ok: true, id: result.insertId, name });
+  });
+
+});
+
+app.post('/students', (req, res) => { 
+  const { name, residency_status, salary_id = 3 } = req.body;
+  if(!name) return res.status(400).json({error: 'Name is required'});
+
+    const sql = 'INSERT INTO students (name, residency_status, salary_id) VALUES (?, ?, ?)';
+    db.query(sql, [name, residency_status, salary_id], (err, result) => {
+      res.status(201).json({ ok: true, id: result.insertId, name });
+  });
+
+});
+
 // Joins salary with the students table
 app.get('/students', (req, res) => {
     const sql = `
