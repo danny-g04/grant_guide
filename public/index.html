@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Research Budget Builder</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <header class="topbar">
@@ -24,16 +26,16 @@
         <label>Name</label>
         <input id="Name" type="text" placeholder="Enter name">
 
-    <label>Role</label>
-    <select id="Role">
+        <label>Role</label>
+        <select id="Role">
           <option value="PI">Principal Investigator (PI)</option>
           <option value="Co-PI">Co-Principal Investigator (Co-PI)</option>
           <option value="Staff">Staff</option>
           <option value="Student">Student</option>
-    </select>
+        </select>
 
-    <button id="addFaculty" type="button">Add Faculty</button>
-    <button id="addStudent" type="button">Add Student</button>
+        <button id="addFaculty" type="button">Add Faculty</button>
+        <button id="addStudent" type="button">Add Student</button>
 
         <div class="row">
 
@@ -43,21 +45,27 @@
     </section>
 
 
-        <!-- Step 2 -->
-        <section class="card">
-          <h2>Step 2: Personnel & Students</h2>
-          <table id="peopleTable">
-            <thead>
-              <tr><th>Name</th><th>Role</th><th>Effort %</th><th>Base</th><th>Fringe%</th></tr>
-            </thead>
-            <tbody id="peopleBody"></tbody>
-          </table>
-        </section>
+    <!-- Step 2 -->
+    <section class="card">
+      <h2>Step 2: Personnel & Students</h2>
+      <table id="peopleTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Effort %</th>
+            <th>Base</th>
+            <th>Fringe%</th>
+          </tr>
+        </thead>
+        <tbody id="peopleBody"></tbody>
+      </table>
+    </section>
 
     <!-- Step 3 -->
     <section class="card">
       <h2>Step 3: Travel</h2>
-      <form id="travelForm"> 
+      <form id="travelForm">
         <label>Destination</label>
         <div class="sameline" id="travelProfiles">
           <!-- radio buttons will be injected from DB -->
@@ -74,17 +82,25 @@
 
       <table id="travelTable">
         <thead>
-          <tr><th>Type</th><th>Days</th><th>Airfare</th><th>Per Diem</th><th>Lodging</th><th>Total Per Person</th><th>Trip Total</th> </tr>
+          <tr>
+            <th>Type</th>
+            <th>Days</th>
+            <th>Airfare</th>
+            <th>Per Diem</th>
+            <th>Lodging</th>
+            <th>Total Per Person</th>
+            <th>Trip Total</th>
+          </tr>
         </thead>
         <tbody id="travelBody"></tbody>
       </table>
     </section>
 
 
-
+<!-- Step 4 -->
     <section class="card" id="tuitionCard">
       <h2>Step 4: Tuition & Fees</h2>
-    
+
       <table border="1" style="width:100%;">
         <thead>
           <tr>
@@ -98,56 +114,77 @@
         <tbody id="tuitionBody"></tbody>
       </table>
     </section>
-    
-    <section class="card" id="subawards">
+
+
+<!-- Step 5 -->    
+    <section class="card">
       <h2>Step 5: Subawards</h2>
+      <div class="subawards">
+        <label>Include Subawards?
+          <input type="checkbox" id="subawards">
+        </label>
+      </div>
     </section>
 
-  <section class="card">
-  <h2>Step 6: Subawards</h2>
-  <div class="subawards">
-    <label>Include Subawards?
-    <input type="checkbox" id="subawards">
-    </label>
-  </div>
-</section>
 
-    
-
+<!-- Step 6 -->
     <section class="card">
       <h2>Step 6: 5-Year Planning</h2>
       <table id="planTable">
-        <tr><th>Year</th><th>Staff</th><th>Students</th><th>Travel</th></tr>
-        <tr><td>
-          Year 1
-        </td>
-        <td contenteditable></td>
-        <td contenteditable>
-        </td>
-        <td contenteditable>
-        </td>
-      </tr>
-        <tr><td>Year 2</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
-        <tr><td>Year 3</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
-        <tr><td>Year 4</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
-        <tr><td>Year 5</td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+        <tr>
+          <th>Year</th>
+          <th>Staff</th>
+          <th>Students</th>
+          <th>Travel</th>
+        </tr>
+        <tr>
+          <td>
+            Year 1
+          </td>
+          <td contenteditable></td>
+          <td contenteditable>
+          </td>
+          <td contenteditable>
+          </td>
+        </tr>
+        <tr>
+          <td>Year 2</td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+        </tr>
+        <tr>
+          <td>Year 3</td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+        </tr>
+        <tr>
+          <td>Year 4</td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+        </tr>
+        <tr>
+          <td>Year 5</td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+          <td contenteditable></td>
+        </tr>
       </table>
       <button id="generate" type="button">Generate Detailed Budget</button>
     </section>
 
-        <!-- Step 7 -->
-        <section class="card">
-          <h2>Step 7: Review & Adjust Budget</h2>
-          <div id="totals"></div>
-          <div class="actions">
-           <!-- <button id="recalc">Recalculate</button> -->
-            <button id="save">Save Draft</button>
-            <button id="export" class="export">Export to CSV</button>
-          </div>
-        </section>
-
-
-    
+    <!-- Step 7 -->
+    <section class="card">
+      <h2>Step 7: Review & Adjust Budget</h2>
+      <div id="totals"></div>
+      <div class="actions">
+        <!-- <button id="recalc">Recalculate</button> -->
+        <button id="save">Save Draft</button>
+        <button id="export" class="export">Export to CSV</button>
+      </div>
+    </section>
 
 
   </main>
@@ -155,8 +192,5 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>
-
-
-
-
