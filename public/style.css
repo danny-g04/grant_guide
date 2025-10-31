@@ -43,7 +43,7 @@ body {
 .topbar {
   position: fixed;
   top: 0;
-  left: 70px;
+  left: 0px;
   right: 0;
   height: 60px;
   background-color: #ffffff;
