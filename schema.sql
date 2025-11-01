@@ -46,6 +46,11 @@ VALUES
   (60000, 36.7, DEFAULT), -- Staff Rates
   (10000, 3.2, 50) /*Student Rates*/;
 
+INSERT INTO
+  tuition_fee_schedules (semester, residency_status, tuition_semester, fee_semester, annual_increase_semester)
+VALUES
+  ('fall', 'in_state', 5000, 300, 0.03);
+
 ------------------- Dependent Tables that uses reference tables. User inserts data into these tables --------------------------------
 CREATE TABLE
   IF NOT EXISTS faculty (
