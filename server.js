@@ -47,13 +47,19 @@ app.post('/faculty', (req, res) => {
 });
 
 app.post('/students', (req, res) => {
-  const { name, residency_status, salary_id = 3 } = req.body;
+  const { name, residency_status, salary_id, tuition_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
-  const sql = 'INSERT INTO students (name, residency_status, salary_id) VALUES (?, ?, ?)';
-  db.query(sql, [name, residency_status, salary_id], (err, result) => {
-    res.status(201).json({ ok: true, id: result.insertId, name });
-  });
+  const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
+  db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+
+  res.status(201).json({ ok: true, student_id: result.insertId, name, residency_status });
+});
+
 
 });
 

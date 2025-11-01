@@ -64,9 +64,11 @@ async function loadRefs() {
 //Step 1 - Users, letting users add students into the DB
 document.getElementById('addStudent').addEventListener('click', async () => {
   const name = document.getElementById('Name').value.trim();
-  let salary_id = 3;
+  let salary_id = 4;
+  let tuition_id = 1;
   let residency_status = "in_state";
 
+console.log({ name, residency_status, salary_id, tuition_id });
 
   if (!name) {
     alert('Please enter a name');
@@ -76,7 +78,7 @@ document.getElementById('addStudent').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/students', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, residency_status, salary_id })
+      body: JSON.stringify({ name, residency_status, salary_id, tuition_id })
     });
 
     if (!res.ok) {
@@ -105,8 +107,10 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
   let salary_id;
   if (role == "PI") {
     salary_id = 1;
-  } else {
+  } else if (role == "Co-PI") {
     salary_id = 2;
+  } else {
+    salary_id = 3;
   }
 
   try {
@@ -138,7 +142,7 @@ function renderPeople() { // This just shows the people on the page
       <td><input type="number" min="0" max="${p.role === 'Student' ? 50 : 100}" step="1" value="${p.effort}"
                  data-idx="${i}" class="effort"></td>
       <td>${fmt(p.base)}</td>
-      <td>${(p.fringe * 100).toFixed(1)}%</td>
+      <td>${(p.fringe).toFixed(1)}%</td>
     </tr>
   `).join('');
 
@@ -235,7 +239,7 @@ function calcTotals() { // need to seperate travel cost from f and A
   // salaries & fringe
   const salary = state.people.reduce((sum, p) => sum + n(p.base) * (n(p.effort) / 100), 0);
   const fringe = state.people.reduce((sum, p) => {
-    const sal = n(p.base) * (n(p.effort) / 100);
+    const sal = n(p.base) * (n(p.effort)/10000);
     return sum + sal * n(p.fringe);
   }, 0);
 
@@ -288,7 +292,7 @@ function exportXLSX() { // for the excel file
 
   const rows = [
     ['Name', 'Role', 'Effort%', 'Base', 'Fringe%'],
-    ...state.people.map(p => [p.name, p.role, p.effort, p.base, (p.fringe * 100).toFixed(1)]),
+    ...state.people.map(p => [p.name, p.role, p.effort, p.base, (p.fringe).toFixed(1)]),
     [],
     ['TravelType', 'Trips', 'Days', 'Airfare', 'PerDiem', 'Lodging'],
     ...state.travelLines.map(t => [t.type, t.trips, t.days, t.airfare, t.perDiem, t.lodging])
