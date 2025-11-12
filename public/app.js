@@ -50,6 +50,8 @@ async function loadRefs() {
   ];
 
   renderPeople();
+  tuitionBody.innerHTML='';
+  stu. map(s => addTuitionRow(s));
 
 
   //Step 3 - Travel, Creates destination buttons

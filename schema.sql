@@ -1,8 +1,9 @@
+
 CREATE DATABASE IF NOT EXISTS budget_path;
 
 USE budget_path;
 
--------------------------- Reference Tables with pre-set information ----------------------------
+-------------------------- Preference Tables with pre-set information ----------------------------
 CREATE TABLE
   IF NOT EXISTS salary (
     salary_id INT AUTO_INCREMENT PRIMARY KEY,
