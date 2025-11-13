@@ -14,6 +14,7 @@ const state = {
   travelProfiles: [],
   people: [], // {name, role, effort, base, fringe}
   travelLines: [], // {type, trips, days, airfare, perDiem, lodging}
+  subAwards: [],
   faRate: 0.50
 };
 
@@ -50,8 +51,8 @@ async function loadRefs() {
   ];
 
   renderPeople();
-  tuitionBody.innerHTML='';
-  stu. map(s => addTuitionRow(s));
+  tuitionBody.innerHTML = '';
+  stu.map(s => addTuitionRow(s));
 
 
   //Step 3 - Travel, Creates destination buttons
@@ -70,7 +71,7 @@ document.getElementById('addStudent').addEventListener('click', async () => {
   let tuition_id = 1;
   let residency_status = "in_state";
 
-console.log({ name, residency_status, salary_id, tuition_id });
+  console.log({ name, residency_status, salary_id, tuition_id });
 
   if (!name) {
     alert('Please enter a name');
@@ -229,8 +230,44 @@ function addTuitionRow(createdStudent) {
 }
 
 //Step 5 - Subawards, Allows user to add subaward amount
-function addSubawards(){
+function addSubawards() {
+  const box = document.getElementById("subawards");
+  const subawardBody = document.getElementById("subawardBody");
+  box.addEventListener("change", () => {
+    if (box.checked) {
+      //creates a form to enter amount when the box is checked
+      subawardBody.innerHTML = `
+      <form>
+        <p> Enter Subaward amount: </p>
+        <input type = "number" id = "subamount" placeholder ="Amount $" min=1>
+        <button type="button" id="submit"> Add </button>
+      </form>
+      <h4 id="awardSum"> </h4>
+      <div id="display_body"> </div>
+      `;
 
+      const submitbtn = document.getElementById("submit");
+
+      submitbtn.addEventListener("click", () => {
+        //Gets subaward amount from user and displays each on the card
+        const value = Number(document.getElementById("subamount").value);
+        const display = document.getElementById("display_body");
+        state.subAwards.push(value);
+        display.innerHTML = state.subAwards.map((a, i) => `<p class ="tight_text">Subaward ${i+1}: $${a} </p>`).join('');
+
+        //Sums the total amount and displays it
+        let total = state.subAwards.reduce((sum, curr) => sum + curr, 0);
+        const sum = document.getElementById("awardSum");
+        sum.innerHTML = `Subaward Total Amount: $${total}`;
+        calcTotals();
+      })
+    } else {
+      //reset if nothing is clicked
+      subawardBody.innerHTML = ``;
+      state.subAwards = [];
+      calcTotals();
+    }
+  })
 }
 
 
@@ -241,7 +278,7 @@ function calcTotals() { // need to seperate travel cost from f and A
   // salaries & fringe
   const salary = state.people.reduce((sum, p) => sum + n(p.base) * (n(p.effort) / 100), 0);
   const fringe = state.people.reduce((sum, p) => {
-    const sal = n(p.base) * (n(p.effort)/10000);
+    const sal = n(p.base) * (n(p.effort) / 10000);
     return sum + sal * n(p.fringe);
   }, 0);
 
@@ -251,11 +288,14 @@ function calcTotals() { // need to seperate travel cost from f and A
     return sum + perTrip * n(t.trips || 1) * n(t.people || 1);
   }, 0);
 
-  const tuition = 0; // Step 6 will add real tuition later
+  const tuition = 0; // Step 4 will add real tuition later
 
-  const direct = salary + fringe + travel + tuition;
+  // Step 5 is adding subaward amount
+  const subaward = state.subAwards.reduce((sum, curr) => sum + curr, 0);
 
-  // EXCLUDE travel from F&A base (common policy). Flip to false if your policy differs.
+  const direct = salary + fringe + travel + tuition + subaward;
+
+  // EXCLUDE travel from F&A base (common policy).
   const excludeTravelFromFA = true;
   const faBase = excludeTravelFromFA ? (direct - travel) : direct;
 
@@ -264,7 +304,7 @@ function calcTotals() { // need to seperate travel cost from f and A
 
   document.getElementById('totals').innerHTML = `
       <p><strong>Direct Costs:</strong> ${fmt(direct)}</p>
-      <p> Salary: ${fmt(salary)} | Fringe: ${fmt(fringe)} | Travel: ${fmt(travel)} | Tuition: ${fmt(tuition)}</p>
+      <p> Salary: ${fmt(salary)} | Fringe: ${fmt(fringe)} | Travel: ${fmt(travel)} | Tuition: ${fmt(tuition)}| Subaward: ${fmt(subaward)}</p>
       <p><strong>F&A base:</strong> ${fmt(faBase)}  ${(state.faRate * 100).toFixed(1)}%</p>
       <p><strong>F&A:</strong> ${fmt(fa)}</p>
       <p><strong>Total:</strong> ${fmt(total)}</p>
@@ -312,8 +352,8 @@ function exportXLSX() { // for the excel file
 function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`; }
 
 document.addEventListener('DOMContentLoaded', () => {
+  addSubawards();
   loadRefs().then(calcTotals);
-
   document.getElementById('addTravel').addEventListener('click', addTravelLine);
   //document.getElementById('recalc').addEventListener('click', calcTotals);
   document.getElementById('save').addEventListener('click', saveDraft);

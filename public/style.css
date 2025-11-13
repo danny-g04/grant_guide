@@ -51,7 +51,7 @@ body {
   padding: 15px;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
   gap: 20px;
 }
 
@@ -92,6 +92,8 @@ input, select {
 .subawards input{
   width: auto;
 }
+
+
 
 .sameline label {
   display: inline-flex;     
@@ -153,4 +155,9 @@ th {
 .row {
   display: flex;
   gap: 10px;
+}
+
+.tight_text{
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
