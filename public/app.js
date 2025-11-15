@@ -143,7 +143,7 @@ function renderPeople() { // This just shows the people on the page
       <td>${p.name}</td>
       <td>${p.role}</td>
       <td><input type="number" min="0" max="${p.role === 'Student' ? 50 : 100}" step="1" value="${p.effort}"
-                 data-idx="${i}" class="effort"></td>
+                 data-idx="${i}" class="effort" style="min-width: 55px;" ></td>
       <td>${fmt(p.base)}</td>
       <td>${(p.fringe).toFixed(1)}%</td>
     </tr>
@@ -253,12 +253,12 @@ function addSubawards() {
         const value = Number(document.getElementById("subamount").value);
         const display = document.getElementById("display_body");
         state.subAwards.push(value);
-        display.innerHTML = state.subAwards.map((a, i) => `<p class ="tight_text">Subaward ${i+1}: $${a} </p>`).join('');
+        display.innerHTML = state.subAwards.map((a, i) => `<p class ="tight_text">Subaward ${i + 1}: ${fmt(a)} </p>`).join('');
 
         //Sums the total amount and displays it
         let total = state.subAwards.reduce((sum, curr) => sum + curr, 0);
         const sum = document.getElementById("awardSum");
-        sum.innerHTML = `Subaward Total Amount: $${total}`;
+        sum.innerHTML = `Subaward Total Amount: ${fmt(total)}`;
         calcTotals();
       })
     } else {
@@ -268,6 +268,42 @@ function addSubawards() {
       calcTotals();
     }
   })
+}
+
+
+//Step 6 - Year Planning, Allows user to select how long the budget will be
+function planLength(salary, travel, tuition, subaward, total) {
+  const yearsSelect = document.getElementById("yearValue");
+  const planningBody = document.getElementById("planningBody");
+
+  //intailize the first row of the table
+  adjustRows(Number(yearsSelect.value));
+
+  //calls function to create a new table when a change happens
+  yearsSelect.addEventListener("change", () => {
+    let years = Number(yearsSelect.value);
+    adjustRows(years);
+  })
+
+  //Function to update table everytime the user selects a new year
+  function adjustRows(years) {
+    //clears the table so old rows don't stack
+    planningBody.innerHTML = ``;
+
+    for (let i = 0; i < years; i++) {
+      let row = document.createElement('tr');
+      row.innerHTML =
+        `<td> ${i + 1} </td>
+         <td> ${fmt(salary)} </td>
+         <td> ${fmt(travel)} </td>
+         <td> ${fmt(tuition)} </td>
+         <td> ${fmt(subaward)} </td>
+         <td> ${fmt(total)} </td>`;
+
+      //add a row for every year
+      planningBody.appendChild(row);
+    }
+  }
 }
 
 
@@ -309,6 +345,8 @@ function calcTotals() { // need to seperate travel cost from f and A
       <p><strong>F&A:</strong> ${fmt(fa)}</p>
       <p><strong>Total:</strong> ${fmt(total)}</p>
     `;
+
+  planLength(salary, travel, tuition, subaward, total);
 }
 
 //Step 7 - Review Budget, Creates budget with name and ID
@@ -349,10 +387,11 @@ function exportXLSX() { // for the excel file
   XLSX.writeFile(wb, 'budget.xlsx');
 }
 
-function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`; }
+function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`; }
 
 document.addEventListener('DOMContentLoaded', () => {
   addSubawards();
+  // planLength();
   loadRefs().then(calcTotals);
   document.getElementById('addTravel').addEventListener('click', addTravelLine);
   //document.getElementById('recalc').addEventListener('click', calcTotals);

@@ -132,7 +132,27 @@
     <!-- Step 6 -->
     <section class="card">
       <h2>Step 6: 5-Year Planning</h2>
-      <table id="planTable">
+      <label> Select Budget Length
+        <select id="yearValue">
+          <option value="1">1 Year</option>
+          <option value="2">2 Year</option>
+          <option value="3">3 Year</option>
+          <option value="4">4 Year</option>
+          <option value="5">5 Year</option>
+        </select>
+      </label>
+      <table>
+        <tr>
+          <th>Year</th>
+          <th>Salary</th>
+          <th>Travel</th>
+          <th>Tuition</th>
+          <th>Subawards</th>
+          <th>Total</th>
+        </tr>
+        <tbody id="planningBody"></tbody>
+      </table>
+      <!-- <table id="planTable">
         <tr>
           <th>Year</th>
           <th>Staff</th>
@@ -173,8 +193,8 @@
           <td contenteditable></td>
           <td contenteditable></td>
         </tr>
-      </table>
-      <button id="generate" type="button">Generate Detailed Budget</button>
+      </table> -->
+      <!-- <button id="generate" type="button">Generate Detailed Budget</button> -->
     </section>
 
     <!-- Step 7 -->
