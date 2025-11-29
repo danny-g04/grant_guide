@@ -12,6 +12,7 @@ const state = {
   faculty: [],
   students: [],
   travelProfiles: [],
+  tuition_fee_schedules: [],
   people: [], // {name, role, effort, base, fringe}
   travelLines: [], // {type, trips, days, airfare, perDiem, lodging}
   subAwards: [],
@@ -228,6 +229,52 @@ function addTuitionRow(createdStudent) {
 
   tbody.appendChild(tr);
 }
+// Step 4 - Tuition Fee Calculation
+document.addEventListener('click', async function(event) {
+  // Only run on Calculate button
+  if (!event.target.classList.contains('saveTuition')) {
+    return;
+  }
+
+  // Get table row
+  const row = event.target.closest('tr');
+  const studentId = row.getAttribute('data-student-id');
+  const semester = row.querySelector('.semester').value;
+  const residency = row.querySelector('.residency').value;
+
+  try {
+    // Fetch the tuition schedule from backend
+    const res = await fetch('http://localhost:3000/tuition?semester=' + semester + '&residency=' + residency);
+    const data = await res.json();
+
+    // Calculate total tuition + fees
+    const tuitionAmount = Number(data.tuition_semester);
+    const feeAmount = Number(data.fee_semester);
+    const totalCost = tuitionAmount + feeAmount;
+
+    // Show in the UI
+    row.querySelector('.tuitionCell').textContent = '$' + totalCost.toFixed(2);
+
+    // Store in memory for Step 7 totals
+    if (!state.tuitionLines) state.tuitionLines = []; // safety
+    state.tuitionLines.push({
+      studentId: studentId,
+      semester: semester,
+      residency: residency,
+      tuition: tuitionAmount,
+      fees: feeAmount,
+      increaseRate: Number(data.annual_increase_semester),
+      total: totalCost
+    });
+
+    // Recalculate totals
+    calcTotals();
+
+  } catch (error) {
+    console.error(error);
+    alert("Could not calculate tuition.");
+  }
+});
 
 //Step 5 - Subawards, Allows user to add subaward amount
 function addSubawards() {
@@ -290,15 +337,21 @@ function planLength(salary, travel, tuition, subaward, total) {
     //clears the table so old rows don't stack
     planningBody.innerHTML = ``;
 
+    const rate = 0.03;
+
     for (let i = 0; i < years; i++) {
+      const increasedTuition = tuition * Math.pow(1 + rate, i);
+
+      const newTotal = salary + travel + increasedTuition + subaward
+      
       let row = document.createElement('tr');
       row.innerHTML =
         `<td> ${i + 1} </td>
          <td> ${fmt(salary)} </td>
          <td> ${fmt(travel)} </td>
-         <td> ${fmt(tuition)} </td>
+         <td> ${fmt(increasedTuition)} </td>
          <td> ${fmt(subaward)} </td>
-         <td> ${fmt(total)} </td>`;
+         <td> ${fmt(newTotal)} </td>`;
 
       //add a row for every year
       planningBody.appendChild(row);
@@ -324,7 +377,13 @@ function calcTotals() { // need to seperate travel cost from f and A
     return sum + perTrip * n(t.trips || 1) * n(t.people || 1);
   }, 0);
 
-  const tuition = 0; // Step 4 will add real tuition later
+let tuition = 0;
+if (state.tuitionLines && state.tuitionLines.length > 0) {
+  for (let i = 0; i < state.tuitionLines.length; i++) {
+    tuition += state.tuitionLines[i].total;
+  }
+}
+
 
   // Step 5 is adding subaward amount
   const subaward = state.subAwards.reduce((sum, curr) => sum + curr, 0);

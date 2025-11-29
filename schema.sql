@@ -3,7 +3,6 @@ CREATE DATABASE IF NOT EXISTS budget_path;
 
 USE budget_path;
 
--------------------------- Preference Tables with pre-set information ----------------------------
 CREATE TABLE
   IF NOT EXISTS salary (
     salary_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +31,6 @@ CREATE TABLE
     CONSTRAINT uq_sem_res UNIQUE (semester, residency_status)
   );
 
--------------------- Automatically creating rows for reference tables --------------------------
 INSERT INTO
   travel_profiles (trip_type, airfare, per_diem, lodging_caps)
 VALUES
@@ -42,23 +40,22 @@ VALUES
 INSERT INTO
   salary (salary, fringe_rate, fte_percent)
 VALUES
-  (100000, 29.5, DEFAULT), -- Pi Rates
-  (80000, 29.5, DEFAULT), -- Co-Pi Rates
-  (60000, 36.7, DEFAULT), -- Staff Rates
-  (10000, 3.2, 50) /*Student Rates*/;
+  (100000, 29.5, DEFAULT),
+  (80000, 29.5, DEFAULT),
+  (60000, 36.7, DEFAULT),
+  (10000, 3.2, 50);
 
 INSERT INTO
   tuition_fee_schedules (semester, residency_status, tuition_semester, fee_semester, annual_increase_semester)
 VALUES
   ('fall', 'in_state', 5000, 300, 0.03);
 
-------------------- Dependent Tables that uses reference tables. User inserts data into these tables --------------------------------
 CREATE TABLE
   IF NOT EXISTS faculty (
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
     role ENUM ('PI', 'Co-PI', 'Staff') NOT NULL,
-    salary_id INT NOT NULL,
+    salary_id INT NOT NULL Default 3,
     CONSTRAINT fk_faculty_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id)
   );
 
