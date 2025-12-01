@@ -333,7 +333,7 @@ function calcTotals() { // need to seperate travel cost from f and A
 
   // EXCLUDE travel from F&A base (common policy).
   const excludeTravelFromFA = true;
-  const faBase = excludeTravelFromFA ? (direct - travel) : direct;
+  const faBase = excludeTravelFromFA ? (direct - travel - tuition - subaward) : direct;
 
   const fa = faBase * state.faRate;
   const total = direct + fa;

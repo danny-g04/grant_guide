@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS budget_path;
 
 USE budget_path;
 
--------------------------- Preference Tables with pre-set information ----------------------------
+/*Preference Tables with pre-set information */
 CREATE TABLE
   IF NOT EXISTS salary (
     salary_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +32,7 @@ CREATE TABLE
     CONSTRAINT uq_sem_res UNIQUE (semester, residency_status)
   );
 
--------------------- Automatically creating rows for reference tables --------------------------
+/*Automatically creating rows for reference tables*/
 INSERT INTO
   travel_profiles (trip_type, airfare, per_diem, lodging_caps)
 VALUES
@@ -52,7 +52,7 @@ INSERT INTO
 VALUES
   ('fall', 'in_state', 5000, 300, 0.03);
 
-------------------- Dependent Tables that uses reference tables. User inserts data into these tables --------------------------------
+/* Dependent Tables that uses reference tables. User inserts data into these tables */
 CREATE TABLE
   IF NOT EXISTS faculty (
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
