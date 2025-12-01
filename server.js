@@ -114,6 +114,19 @@ app.get('/travel-profiles', (req, res) => {
   });
 });
 
+app.get('/tuition', (req, res) => {
+  const {semester, residency } = req.query;
+
+  const sql = `
+    SELECT tuition_semester,fee_semester 
+    FROM tuition_fee_schedules 
+    Where semester = ? AND residency_status = ? 
+    `;
+  db.query(sql, [semester, residency], (err, rows) => {
+    res.json(rows[0]);
+  });
+});
+
 // app.post is for actually changing the code through inserts and updates in the database
 app.post('/budgets', (req, res) => {
   const { title, fa_rate, start_year } = req.body;
