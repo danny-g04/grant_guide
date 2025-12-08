@@ -54,6 +54,14 @@ VALUES
 
 /* Dependent Tables that uses reference tables. User inserts data into these tables */
 CREATE TABLE
+  IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(128) NOT NULL,
+    email VARCHAR(128) NOT NULL,
+    password VARCHAR(128) NOT NULL
+  );
+
+CREATE TABLE
   IF NOT EXISTS faculty (
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
