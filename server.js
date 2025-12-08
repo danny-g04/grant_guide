@@ -4,6 +4,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(cors());
@@ -34,7 +35,6 @@ app.get('/', (req, res) => {
 
 // Actually query the database
 
-
 app.post('/faculty', (req, res) => {
   const { name, role, salary_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
@@ -52,15 +52,58 @@ app.post('/students', (req, res) => {
 
   const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
   db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
-  if (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: err.message });
-  }
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ ok: false, error: err.message });
+    }
 
-  res.status(201).json({ ok: true, student_id: result.insertId, name, residency_status });
+    res.status(201).json({ ok: true, student_id: result.insertId, name, residency_status });
+  }
+  )
 });
 
+//function to query db
+function query(sql, param) {
+  return new Promise((resolve, reject) => {
+    db.query(sql, param, (err, result) => {
+      if (err)
+        return reject(err);
+      resolve(result)
+    })
+  });
+};
 
+//adds users to db when they register
+app.post('/register', async (req, res) => {     //async allows for await to be used since queries and hashing takes time
+  const { name, email, password } = req.body;   //stores the info from frontend
+
+  let error = [];
+  if (!name || !email || !password)
+    error.push("All fields are required");
+  if (password.length < 8)
+    error.push("Password needs to be at least 8 characters long");
+
+  //checks to see if a user already has the same email
+  let sql = 'SELECT email FROM users where email = ?';
+  let rows = await query(sql, [email]);
+  if (rows.length > 0)
+    error.push("This email is already in use"); //returns how many rows it found in the db if sql is insert
+
+  //sends error array to frontend to display
+  if (error.length > 0) {
+    res.status(400).json({ ok: false, error })
+    //insert into db if no errors
+  } else {
+    try {   //try sees if the insert fails or not. 
+      let hashPass = await bcrypt.hash(password, 10);
+      sql = 'INSERT INTO users (name, email, password) VALUES (?,?,?)';
+      await query(sql, [name, email, hashPass]);
+      res.status(201).json({ ok: true, name });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  };
 });
 
 // Joins salary with the students table
@@ -115,7 +158,7 @@ app.get('/travel-profiles', (req, res) => {
 });
 
 app.get('/tuition', (req, res) => {
-  const {semester, residency } = req.query;
+  const { semester, residency } = req.query;
 
   const sql = `
     SELECT tuition_semester,fee_semester 
