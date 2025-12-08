@@ -74,7 +74,7 @@
                         die("Registerion Unsuccessful");
                     }
                 }
-            }
+            } 
         ?>
         <form action="register.php" method="post">
             <div class="form-group">
