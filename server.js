@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -75,20 +76,23 @@ function query(sql, param) {
 
 //adds users to db when they register
 app.post('/register', async (req, res) => {     //async allows for await to be used since queries and hashing takes time
-  const { name, email, password } = req.body;   //stores the info from frontend
+  const { name, email, password, passwordConfirm } = req.body;   //stores the info from frontend
 
   let error = [];
-  if (!name || !email || !password)
+  if (!name || !email || !password || !passwordConfirm)
     error.push("All fields are required");
-  if (password.length < 8)
-    error.push("Password needs to be at least 8 characters long");
+  else {
+    if (password.length < 8)
+      error.push("Password needs to be at least 8 characters long");
+    if (password != passwordConfirm)
+      error.push("Passwords do not match");
 
-  //checks to see if a user already has the same email
-  let sql = 'SELECT email FROM users where email = ?';
-  let rows = await query(sql, [email]);
-  if (rows.length > 0)
-    error.push("This email is already in use"); //returns how many rows it found in the db if sql is insert
-
+    //checks to see if a user already has the same email
+    let sql = 'SELECT email FROM users where email = ?';
+    let rows = await query(sql, [email]); //returns how many rows it found in the db if sql is insert
+    if (rows.length > 0)
+      error.push("This email is already in use");
+  }
   //sends error array to frontend to display
   if (error.length > 0) {
     res.status(400).json({ ok: false, error })
@@ -98,12 +102,38 @@ app.post('/register', async (req, res) => {     //async allows for await to be u
       let hashPass = await bcrypt.hash(password, 10);
       sql = 'INSERT INTO users (name, email, password) VALUES (?,?,?)';
       await query(sql, [name, email, hashPass]);
-      res.status(201).json({ ok: true, name });
+      res.status(201).json({ ok: true, name });   //201 is successful creation operations
     } catch (err) {
       console.error(err);
       return res.status(500).json({ ok: false, error: err.message });
     }
   };
+});
+
+
+//user login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  let error = [];
+  if (!email || !password)
+    error.push("All fields are required");
+  else {
+    let sql = 'SELECT * FROM users where email = ?';
+    let rows = await query(sql, [email]);
+    if (rows.length == 0)       //checks to see if a user is in the db already
+      error.push("Email does not exist");
+    else {                      //if user exists, check if hash password is same as in db
+      let validPass= await bcrypt.compare(password, rows[0].password);
+      if (!validPass)
+        error.push("Wrong password");
+    }
+  }
+  //sends error array to frontend to display
+  if (error.length > 0)
+    res.status(400).json({ ok: false, error });
+  else
+    res.status(200).json({ ok: true }); //200 is for successful operations like get
 });
 
 // Joins salary with the students table
