@@ -6,12 +6,13 @@ async function getInfo() {
         const name = document.getElementById("name").value;
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
+        const passwordConfirm = document.getElementById("passwordConfirm").value;
 
         //sends input results to the backend
         const response = await fetch('http://localhost:3000/register', {  
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({ name, email, password, passwordConfirm })
         });
 
         //the info sent had errors and couldn't insert into db
@@ -21,6 +22,8 @@ async function getInfo() {
         if(!response.ok){
             errBody.innerHTML= data.error.map((message)=>`<div class ='alert alert-danger'> ${message} </div>` ).join('');
         } else{
+            const form = document.getElementById("formBody");
+            form.reset();
             errBody.innerHTML =`
                 <div class ='alert alert-success'>Registered Successfully </div>`;
         }
