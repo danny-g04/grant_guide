@@ -257,12 +257,12 @@ app.get('/tuition', (req, res) => {
 
 // Have to have the members and budget be added to database at the end because we dont get the budget id until the last step
 app.post('/save-draft', (req, res) => {
-  const { title, fa_rate, start_year, user_id, facultyIDs, studentIDs } = req.body;
+  const { title, fa_rate,user_id, facultyIDs, studentIDs } = req.body;
 
   // get budget stuff. 
   db.query(
-    'INSERT INTO budgets (title, fa_rate, start_year) VALUES (?,?,?)',
-    [title, fa_rate, start_year],
+    'INSERT INTO budgets (title, fa_rate) VALUES (?,?)',
+    [title, fa_rate],
     (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
 
