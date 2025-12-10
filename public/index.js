@@ -106,22 +106,26 @@ document.getElementById('addStudent').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/students', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, residency_status, salary_id, tuition_id})
+      body: JSON.stringify({ name, residency_status, salary_id, tuition_id })
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || res.statusText);
-    }
     const createdStudent = await res.json();
-    addTuitionRow(createdStudent);
-    await loadRefs();
+
+    if (!res.ok) {
+      alert(createdStudent?.error || "Server error occurred");
+      return;
+    }
+
+    if (!createdStudent.ok) {   //checks to see if the user is logged in to add people
+      alert(`${createdStudent.error}`);
+    } else {
+      addTuitionRow(createdStudent);
+      await loadRefs();
+    }
 
   } catch (err) {
     console.error(err);
   }
-
-
 });
 
 //Step 1 - Users, letting users create faculty/staff into DB
@@ -145,15 +149,21 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/faculty', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, role, salary_id})
+      body: JSON.stringify({ name, role, salary_id })
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || res.statusText);
+      alert(data?.error || "Server error occurred");
+      return;
     }
 
-    await loadRefs();
+    if (!data.ok)    //checks to see if the user is logged in to add people
+      alert(`${data.error}`);
+    else
+      await loadRefs();
+    
   } catch (err) {
     console.error(err);
   }
@@ -434,8 +444,8 @@ function calcTotals() { // need to seperate travel cost from f and A
 //Step 7 - saves the budget
 async function saveDraft() {
   const title = document.getElementById('title').value;
-  const startYear = document.getElementById('startDate').value;
-  
+  const start_year = document.getElementById('startDate').value;
+
   const user_id = 1; // hardcoded fo right now
 
   // get the fac and srudent ids from the post
@@ -452,7 +462,7 @@ async function saveDraft() {
         fa_rate: state.faRate,
         start_year,
 
-// extra stuff for members
+        // extra stuff for members
         user_id,
         facultyIDs,
         studentIDs
@@ -486,4 +496,4 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('export').addEventListener('click', exportXLSX);
   document.getElementById('generate').addEventListener('click', generateFromPlan);
 });
-  document.addEventListener('DOMContentLoaded', session);
+document.addEventListener('DOMContentLoaded', session);
