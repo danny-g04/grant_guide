@@ -82,7 +82,7 @@ document.getElementById('addStudent').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/students', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, residency_status, salary_id, tuition_id })
+      body: JSON.stringify({ name, residency_status, salary_id, tuition_id, user_id: 1, budget_id: 1 })
     });
 
     if (!res.ok) {
@@ -121,7 +121,7 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/faculty', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, role, salary_id })
+      body: JSON.stringify({ name, role, salary_id, user_id: 1, budget_id: 1})
     });
 
     if (!res.ok) {

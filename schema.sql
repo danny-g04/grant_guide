@@ -89,3 +89,17 @@ CREATE TABLE
     start_year INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
+
+  Create TABLE
+    IF NOT EXISTS members (
+      member_id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      budget_id INT NOT NULL,
+      member_type ENUM('faculty', 'student') NOT NULL, /* added from the post in server.js*/
+      people_id INT NOT NULL,
+
+      CONSTRAINT fk_members_budget FOREIGN KEY (budget_id) REFERENCES budgets (budget_id),
+      CONSTRAINT fk_members_user FOREIGN KEY (user_id) REFERENCES users (user_id)
+      
+
+    );

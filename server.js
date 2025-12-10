@@ -36,30 +36,68 @@ app.get('/', (req, res) => {
 // Actually query the database
 
 app.post('/faculty', (req, res) => {
-  const { name, role, salary_id } = req.body;
+  const { name, role, salary_id, user_id, budget_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
   const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
-  db.query(sql, [name, role, salary_id], (err, result) => {
-    res.status(201).json({ ok: true, id: result.insertId, name });
-  });
 
+  db.query(sql, [name, role, salary_id], (err, result) => {
+    if(err){
+      return res.status(500).json({ error: err.message });
+    }
+
+  // Insert into members right here
+  // Grab the faculty ID 
+
+  const newFacultyId = result.insertId;
+  const memberSql = `INSERT INTO members (user_id, budget_id, member_type, people_id) Values (?, ?, 'faculty', ?)
+  `;
+
+  
+  db.query(memberSql, [user_id, budget_id, newFacultyId], (err2) =>{
+    if(err2){
+       return res.status(500).json({error: err2.message})
+    }
+    res.status(201).json({
+      ok: true,
+      faculty_id: newFacultyId,
+      name
+      });
+    });
+  });
 });
 
 app.post('/students', (req, res) => {
-  const { name, residency_status, salary_id, tuition_id } = req.body;
+  const { name, residency_status, salary_id, tuition_id, user_id, budget_id} = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
   const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
+
   db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ ok: false, error: err.message });
+      return res.status(500).json({error: err.message });
     }
 
-    res.status(201).json({ ok: true, student_id: result.insertId, name, residency_status });
-  }
-  )
+    // Insert into members here
+    // And grab the studentID
+
+    const newStudentId = result.insertId;
+    const memberSql = `
+      INSERT INTO members (user_id, budget_id, member_type, people_id) Values (?, ?, 'student', ?)
+    `;
+
+    db.query(memberSql, [user_id, budget_id, newStudentId], (err2) =>{
+      if(err2){
+        return res.status(500).json({error: err2.message})
+      }
+
+    res.status(201).json({ 
+      ok: true, 
+      student_id: newStudentId, name, 
+      residency_status 
+      });
+    });
+  });
 });
 
 //function to query db
