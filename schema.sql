@@ -86,7 +86,6 @@ CREATE TABLE
     budget_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     fa_rate DECIMAL(5, 4) NOT NULL,
-    start_year INT NOT NULL, /* I honestly might want to get rid of this*/
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 

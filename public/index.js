@@ -434,7 +434,6 @@ function calcTotals() { // need to seperate travel cost from f and A
 //Step 7 - saves the budget
 async function saveDraft() {
   const title = document.getElementById('title').value;
-  const startYear = document.getElementById('startDate').value;
   
   const user_id = 1; // hardcoded fo right now
 
@@ -450,7 +449,6 @@ async function saveDraft() {
         // everything for budget
         title,
         fa_rate: state.faRate,
-        start_year,
 
 // extra stuff for members
         user_id,
