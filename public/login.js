@@ -20,8 +20,6 @@ async function login() {
         if (!response.ok) {
             errBody.innerHTML = data.error.map((message) => `<div class ='alert alert-danger'> ${message} </div>`).join('');
         } else {
-            // errBody.innerHTML = `
-            //     <div class ='alert alert-success'>Logged in Successfully </div>`;
             window.location.href = "index.html";
         }
     });
