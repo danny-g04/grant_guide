@@ -47,43 +47,51 @@ app.get('/', (req, res) => {
 // Actually query the database
 
 app.post('/faculty', (req, res) => {
-  const { name, role, salary_id} = req.body;
+  const { name, role, salary_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
+  if (!req.session.user_id)
+    return res.status(401).json({ ok: false, error: 'Log in to start grant' });  //user isn't logged in
+  else {
 
-  const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
 
-  db.query(sql, [name, role, salary_id], (err, result) => {
-    if(err){
-      return res.status(500).json({ error: err.message });
-    }
+    db.query(sql, [name, role, salary_id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
-    res.status(201).json({
-      ok: true,
-      faculty_id: result.insertId,
-      name
+      res.status(201).json({
+        ok: true,
+        faculty_id: result.insertId,
+        name
       });
     });
-  });
+  }
+});
 
 app.post('/students', (req, res) => {
-  const { name, residency_status, salary_id, tuition_id} = req.body;
+  const { name, residency_status, salary_id, tuition_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
-  const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
+  if (!req.session.user_id)
+    return res.status(401).json({ ok: false, error: 'Log in to start grant' });  //user isn't logged in
+  else {
+    const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
 
-  db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
-    if (err) {
-      return res.status(500).json({error: err.message });
-    }
+    db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
-    res.status(201).json({ 
-      ok: true, 
-      student_id: result.insertId, 
-      name, 
-      residency_status 
+      res.status(201).json({
+        ok: true,
+        student_id: result.insertId,
+        name,
+        residency_status
       });
     });
-  });
+  }
+});
 
 //function to query db
 function query(sql, param) {
@@ -156,16 +164,17 @@ app.post('/login', async (req, res) => {
     res.status(400).json({ ok: false, error });
   else {
     req.session.name = rows[0].name;
-    res.status(200).json({ ok: true, name : req.session.name}); //200 is for successful operations
+    req.session.user_id = rows[0].user_id;
+    res.status(200).json({ ok: true, name: req.session.name }); //200 is for successful operations
   }
 });
 
 //checks to see if the user is logged in
 app.get('/session', (req, res) => {
   if (req.session.name)
-    res.json({loggedIn :true, name : req.session.name});
-  else 
-       res.json({loggedIn :false});
+    res.json({ loggedIn: true, name: req.session.name });
+  else
+    res.json({ loggedIn: false });
 });
 
 
@@ -260,7 +269,7 @@ app.post('/save-draft', (req, res) => {
       const budget_id = result.insertId;
 
       // fill the members table for faculty member
-      for(let i = 0; i < facultyIDs.length; i++){
+      for (let i = 0; i < facultyIDs.length; i++) {
         const fid = facultyIDs[i];
         db.query(
           'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "faculty", ?)',
@@ -269,7 +278,7 @@ app.post('/save-draft', (req, res) => {
       }
 
       // fills the members table for students
-      for(let i = 0; i < studentIDs.length; i++){
+      for (let i = 0; i < studentIDs.length; i++) {
         const sid = studentIDs[i];
         db.query(
           'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "student", ?)',
