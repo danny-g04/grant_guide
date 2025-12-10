@@ -5,12 +5,22 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+//sets up sessions
+app.use(session({
+  secret: 'supersecretstring',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 } // 1 hour
+}));
 
 // Create a MySQL connection
 const db = mysql.createConnection({
@@ -110,21 +120,21 @@ app.post('/register', async (req, res) => {     //async allows for await to be u
   };
 });
 
-
 //user login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  //queries the db to see if the email exists
+  let sql = 'SELECT * FROM users where email = ?';
+  let rows = await query(sql, [email]);
 
   let error = [];
   if (!email || !password)
     error.push("All fields are required");
   else {
-    let sql = 'SELECT * FROM users where email = ?';
-    let rows = await query(sql, [email]);
     if (rows.length == 0)       //checks to see if a user is in the db already
       error.push("Email does not exist");
     else {                      //if user exists, check if hash password is same as in db
-      let validPass= await bcrypt.compare(password, rows[0].password);
+      let validPass = await bcrypt.compare(password, rows[0].password);
       if (!validPass)
         error.push("Wrong password");
     }
@@ -132,8 +142,31 @@ app.post('/login', async (req, res) => {
   //sends error array to frontend to display
   if (error.length > 0)
     res.status(400).json({ ok: false, error });
-  else
-    res.status(200).json({ ok: true }); //200 is for successful operations like get
+  else {
+    req.session.name = rows[0].name;
+    res.status(200).json({ ok: true, name : req.session.name}); //200 is for successful operations
+  }
+});
+
+//checks to see if the user is logged in
+app.get('/session', (req, res) => {
+  if (req.session.name)
+    res.json({loggedIn :true, name : req.session.name});
+  else 
+       res.json({loggedIn :false});
+});
+
+
+//destroy session when user logs out
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ ok: false, error: 'Failed to log out' });
+    }
+    // Session successfully destroyed
+    res.json({ ok: true });
+  });
 });
 
 // Joins salary with the students table
