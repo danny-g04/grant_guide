@@ -21,6 +21,29 @@ const state = {
 
 
 //-------------------------FUNCTIONS----------------------------------\\
+
+//Checks to see if user is logged in
+async function session() {
+  const response = await fetch('http://localhost:3000/session');
+  const data = await response.json();
+  const navbar = document.getElementById("navbar");
+
+  if (data.loggedIn) {
+    navbar.innerHTML = ` 
+    <div class ="sameline">
+      <p class ="spacing-text"> <strong>Welcome<Strong> <u>${data.name} </u> </p>
+      <button id="logout" class="logout-btn"> Logout </button>
+    </div>
+    `;
+    const logout = document.getElementById("logout");
+    logout.addEventListener("click", async () => {
+      const res = await fetch('http://localhost:3000/logout', { method: 'POST' });
+      window.location.href = "login.html";
+    }
+    )
+  }
+}
+
 async function loadRefs() {
   const [fac, stu, trv] = await Promise.all([ // loads everything at the same time
     getJSON(`${API}/faculty`), // gets data for all of these for the render functions
@@ -64,6 +87,7 @@ async function loadRefs() {
   ).join(`<br>`);
 
 }
+
 
 //Step 1 - Users, letting users add students into the DB
 document.getElementById('addStudent').addEventListener('click', async () => {
@@ -134,7 +158,6 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
     console.error(err);
   }
 });
-
 
 //Step 2 - Personal and Students, Allows user to adjust effort % of each faculty/student
 function renderPeople() { // This just shows the people on the page
@@ -230,7 +253,7 @@ function addTuitionRow(createdStudent) {
   tbody.appendChild(tr);
 }
 // Step 4 - Tuition Fee Calculation
-document.addEventListener('click', async function(event) {
+document.addEventListener('click', async function (event) {
   // Only run on Calculate button
   if (!event.target.classList.contains('saveTuition')) {
     return;
@@ -343,7 +366,7 @@ function planLength(salary, travel, tuition, subaward, total) {
       const increasedTuition = tuition * Math.pow(1 + rate, i);
 
       const newTotal = salary + travel + increasedTuition + subaward
-      
+
       let row = document.createElement('tr');
       row.innerHTML =
         `<td> ${i + 1} </td>
@@ -377,12 +400,12 @@ function calcTotals() { // need to seperate travel cost from f and A
     return sum + perTrip * n(t.trips || 1) * n(t.people || 1);
   }, 0);
 
-let tuition = 0;
-if (state.tuitionLines && state.tuitionLines.length > 0) {
-  for (let i = 0; i < state.tuitionLines.length; i++) {
-    tuition += state.tuitionLines[i].total;
+  let tuition = 0;
+  if (state.tuitionLines && state.tuitionLines.length > 0) {
+    for (let i = 0; i < state.tuitionLines.length; i++) {
+      tuition += state.tuitionLines[i].total;
+    }
   }
-}
 
 
   // Step 5 is adding subaward amount
@@ -457,5 +480,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save').addEventListener('click', saveDraft);
   document.getElementById('export').addEventListener('click', exportXLSX);
   document.getElementById('generate').addEventListener('click', generateFromPlan);
-
 });
+  document.addEventListener('DOMContentLoaded', session);
