@@ -35,7 +35,7 @@ body {
   background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 8px 14px;
+  padding: 8px 10px;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -161,6 +161,14 @@ th {
   margin-top: 0px;
 }
 
+.sameline{
+  display: flex;
+  /* justify-content: space-between; */
+}
+
+.spacing-text{
+  padding-right: 10px;
+}
 
 /* Login/Registeration Pages  */
 .content-login {
