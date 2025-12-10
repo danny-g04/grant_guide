@@ -50,7 +50,12 @@ VALUES
 INSERT INTO
   tuition_fee_schedules (semester, residency_status, tuition_semester, fee_semester, annual_increase_semester)
 VALUES
-  ('fall', 'in_state', 5000, 300, 0.03);
+  ('fall', 'in_state', 5000, 300, 0.03),
+  ('fall', 'out_state', 10000, 600, 0.03),
+  ('spring', 'in_state', 4500, 300, 0.03),
+  ('spring', 'out_state', 9000, 600, 0.03),
+  ('summer', 'in_state', 2000, 300, 0.03),
+  ('summer', 'out_state', 4000, 600, 0.03);
 
 /* Dependent Tables that uses reference tables. User inserts data into these tables */
 CREATE TABLE
