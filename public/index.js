@@ -106,7 +106,7 @@ document.getElementById('addStudent').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/students', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, residency_status, salary_id, tuition_id })
+      body: JSON.stringify({ name, residency_status, salary_id, tuition_id})
     });
 
     if (!res.ok) {
@@ -145,7 +145,7 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
     const res = await fetch('http://localhost:3000/faculty', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, role, salary_id })
+      body: JSON.stringify({ name, role, salary_id})
     });
 
     if (!res.ok) {
@@ -431,42 +431,47 @@ function calcTotals() { // need to seperate travel cost from f and A
   planLength(salary, travel, tuition, subaward, total);
 }
 
-//Step 7 - Review Budget, Creates budget with name and ID
-function saveDraft() {
-  const title = document.getElementById('title').value || 'Untitled Budget';
-  const startYear = (document.getElementById('startDate').value || '2026-01-01').slice(0, 4);
+//Step 7 - saves the budget
+async function saveDraft() {
+  const title = document.getElementById('title').value;
+  const startYear = document.getElementById('startDate').value;
+  
+  const user_id = 1; // hardcoded fo right now
 
-  fetch(`${API}/budgets`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, fa_rate: state.faRate, start_year: +startYear })
-  })
-    .then(r => r.json())
-    .then(j => {
-      if (j.ok) alert(`Saved! Budget ID = ${j.budget_id}`);
-      else alert('Save failed: ' + (j.error || 'unknown'));
-    })
-    .catch(e => alert('Save error: ' + e.message));
-}
+  // get the fac and srudent ids from the post
+  const facultyIDs = state.faculty.map(f => f.faculty_id);
+  const studentIDs = state.students.map(s => s.student_id);
 
-//Step 7 - Review Budget, Creates and stores data into Excel sheet
-function exportXLSX() { // for the excel file
+  try {
+    const res = await fetch(`${API}/save-draft`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        // everything for budget
+        title,
+        fa_rate: state.faRate,
+        start_year,
 
-  const rows = [
-    ['Name', 'Role', 'Effort%', 'Base', 'Fringe%'],
-    ...state.people.map(p => [p.name, p.role, p.effort, p.base, (p.fringe).toFixed(1)]),
-    [],
-    ['TravelType', 'Trips', 'Days', 'Airfare', 'PerDiem', 'Lodging'],
-    ...state.travelLines.map(t => [t.type, t.trips, t.days, t.airfare, t.perDiem, t.lodging])
-  ];
+// extra stuff for members
+        user_id,
+        facultyIDs,
+        studentIDs
+      })
+    });
 
-  // Convert to worksheet 
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Budget');
+    // Handle errors if no result
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || res.statusText);
+    }
 
-  // Trigger download as .xlsx
-  XLSX.writeFile(wb, 'budget.xlsx');
+    const response = await res.json();
+
+    alert(`Draft Saved`);
+
+  } catch (e) {
+    alert('Error with saving the draft: ' + e.message);
+  }
 }
 
 function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`; }

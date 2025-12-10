@@ -47,31 +47,43 @@ app.get('/', (req, res) => {
 // Actually query the database
 
 app.post('/faculty', (req, res) => {
-  const { name, role, salary_id } = req.body;
+  const { name, role, salary_id} = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
   const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
+
   db.query(sql, [name, role, salary_id], (err, result) => {
-    res.status(201).json({ ok: true, id: result.insertId, name });
+    if(err){
+      return res.status(500).json({ error: err.message });
+    }
+
+    res.status(201).json({
+      ok: true,
+      faculty_id: result.insertId,
+      name
+      });
+    });
   });
 
-});
-
 app.post('/students', (req, res) => {
-  const { name, residency_status, salary_id, tuition_id } = req.body;
+  const { name, residency_status, salary_id, tuition_id} = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
   const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
+
   db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ ok: false, error: err.message });
+      return res.status(500).json({error: err.message });
     }
 
-    res.status(201).json({ ok: true, student_id: result.insertId, name, residency_status });
-  }
-  )
-});
+    res.status(201).json({ 
+      ok: true, 
+      student_id: result.insertId, 
+      name, 
+      residency_status 
+      });
+    });
+  });
 
 //function to query db
 function query(sql, param) {
@@ -233,16 +245,44 @@ app.get('/tuition', (req, res) => {
   });
 });
 
-// app.post is for actually changing the code through inserts and updates in the database
-app.post('/budgets', (req, res) => {
-  const { title, fa_rate, start_year } = req.body;
-  db.query('INSERT INTO budgets (title, fa_rate, start_year) VALUES (?,?,?)',
+
+// Have to have the members and budget be added to database at the end because we dont get the budget id until the last step
+app.post('/save-draft', (req, res) => {
+  const { title, fa_rate, start_year, user_id, facultyIDs, studentIDs } = req.body;
+
+  // get budget stuff. 
+  db.query(
+    'INSERT INTO budgets (title, fa_rate, start_year) VALUES (?,?,?)',
     [title, fa_rate, start_year],
-    (err, result) => { // This is just for all of the errors
-      res.json({ ok: true, budget_id: result.insertId });
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      const budget_id = result.insertId;
+
+      // fill the members table for faculty member
+      for(let i = 0; i < facultyIDs.length; i++){
+        const fid = facultyIDs[i];
+        db.query(
+          'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "faculty", ?)',
+          [user_id, budget_id, fid]
+        );
+      }
+
+      // fills the members table for students
+      for(let i = 0; i < studentIDs.length; i++){
+        const sid = studentIDs[i];
+        db.query(
+          'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "student", ?)',
+          [user_id, budget_id, sid]
+        );
+      }
+
+      // 
+      res.json({ ok: true, budget_id });
     }
   );
 });
+
 
 // Start the server
 const PORT = 3000;
