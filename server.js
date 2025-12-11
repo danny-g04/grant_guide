@@ -64,9 +64,9 @@ app.post('/faculty', (req, res) => {
     return res.status(401).json({ ok: false, error: 'Log in to start grant' });  //user isn't logged in
   else {
 
-    const sql = 'INSERT INTO faculty (name, role, salary_id) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO faculty (name, role, salary_id, user_id) VALUES (?, ?, ?, ?)';
 
-    db.query(sql, [name, role, salary_id], (err, result) => {
+    db.query(sql, [name, role, salary_id, req.session.user_id], (err, result) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -87,9 +87,9 @@ app.post('/students', (req, res) => {
   if (!req.session.user_id)
     return res.status(401).json({ ok: false, error: 'Log in to start grant' });  //user isn't logged in
   else {
-    const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO students (name, residency_status, salary_id, tuition_id, user_id) VALUES (?, ?, ?, ?,?)';
 
-    db.query(sql, [name, residency_status, salary_id, tuition_id], (err, result) => {
+    db.query(sql, [name, residency_status, salary_id, tuition_id, req.session.user_id], (err, result) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -177,9 +177,10 @@ app.get('/students', (req, res) => {
              sal.fringe_rate    
       FROM students s
       LEFT JOIN salary sal ON sal.salary_id = s.salary_id
+      WHERE s.user_id = ?
       ORDER BY s.student_id
     `;
-  db.query(sql, (err, rows) => {
+  db.query(sql, [req.session.user_id], (err, rows) => {
     res.json(rows); // do I really need the json will dive deeper into this as we progress
   });
 });
@@ -194,9 +195,10 @@ app.get('/faculty', (req, res) => {
              s.fringe_rate
       FROM faculty f
       JOIN salary s ON s.salary_id = f.salary_id
+      WHERE f.user_id = ?
       ORDER BY f.name
     `;
-  db.query(sql, (err, rows) => {
+  db.query(sql, [req.session.user_id], (err, rows) => {
     res.json(rows);
   });
 });

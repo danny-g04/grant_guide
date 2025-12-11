@@ -75,9 +75,12 @@ CREATE TABLE
   IF NOT EXISTS faculty (
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
+    user_id INT NOT NULL,
     role ENUM ('PI', 'Co-PI', 'Staff') NOT NULL,
     salary_id INT NOT NULL DEFAULT 3,
     CONSTRAINT fk_faculty_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id)
+    CONSTRAINT fk_faculty_user FOREIGN KEY (user_id) REFERENCES users(user_id);
+
   );
 
 CREATE TABLE
@@ -87,8 +90,11 @@ CREATE TABLE
     residency_status ENUM ('in_state', 'out_state') NOT NULL,
     salary_id INT NULL DEFAULT 4,
     tuition_id INT NOT NULL,
+    user_id INT NOT NULL,
     CONSTRAINT fk_students_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id),
     CONSTRAINT fk_students_tuition FOREIGN KEY (tuition_id) REFERENCES tuition_fee_schedules (tuition_id)
+    CONSTRAINT fk_students_user FOREIGN KEY (user_id) REFERENCES users(user_id);
+
   );
 
 CREATE TABLE
@@ -106,7 +112,7 @@ CREATE TABLE
     user_id INT NOT NULL,
     budget_id INT NOT NULL,
     member_type ENUM ('faculty', 'student') NOT NULL,
-    /* added from the post in server.js*/
+  
     people_id INT NOT NULL,
     CONSTRAINT fk_members_budget FOREIGN KEY (budget_id) REFERENCES budgets (budget_id),
     CONSTRAINT fk_members_user FOREIGN KEY (user_id) REFERENCES users (user_id)

@@ -94,9 +94,16 @@ async function loadRefs() {
 //Step 1 - Users, letting users add students into the DB
 document.getElementById('addStudent').addEventListener('click', async () => {
   const name = document.getElementById('Name').value.trim();
+  const role = document.getElementById('Role').value.trim();
   let salary_id = 4;
   let tuition_id = 1;
   let residency_status = "in_state";
+
+
+  if(role !== "Student"){
+    alert("Role must be set to Student before adding a student.")
+    return;
+  }
 
   console.log({ name, residency_status, salary_id, tuition_id });
 
@@ -136,6 +143,11 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
   const role = document.getElementById('Role').value.trim();
   if (!name) {
     alert('Please enter a name');
+    return;
+  }
+
+  if(role === "Student"){
+    alert("To add a student, click the Add Student button.");
     return;
   }
   let salary_id;
