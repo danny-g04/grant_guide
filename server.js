@@ -56,7 +56,7 @@ function query(sql, param) {
 };
 
 //------------- routes for index.js --------------- \\
-  //adds info to table in db
+//adds info to table in db
 app.post('/faculty', (req, res) => {
   const { name, role, salary_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Name is required' });
@@ -105,12 +105,12 @@ app.post('/students', (req, res) => {
 });
 
 app.post('/save-draft', (req, res) => {
-  const { title, budget_cost, yearsSelect, facultyIDs, studentIDs } = req.body;
+  const { title, budget_cost, budget_len, facultyIDs, studentIDs } = req.body;
 
   // get budget stuff. 
   db.query(
-    'INSERT INTO budgets (title, total_amount, length) VALUES (?,?, ?)',
-    [title, budget_cost, yearsSelect],
+    'INSERT INTO budgets (title, total_amount, length) VALUES (?,?,?)',
+    [title, budget_cost, budget_len],
     (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
 
@@ -120,7 +120,7 @@ app.post('/save-draft', (req, res) => {
       for (let i = 0; i < facultyIDs.length; i++) {
         const fid = facultyIDs[i];
         db.query(
-          'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "faculty", ?)',
+          `INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "faculty", ?)`,
           [req.session.user_id, budget_id, fid]
         );
       }
@@ -129,7 +129,7 @@ app.post('/save-draft', (req, res) => {
       for (let i = 0; i < studentIDs.length; i++) {
         const sid = studentIDs[i];
         db.query(
-          'INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "student", ?)',
+          `INSERT INTO members (user_id, budget_id, member_type, people_id) VALUES (?, ?, "student", ?)`,
           [req.session.user_id, budget_id, sid]
         );
       }
@@ -138,7 +138,7 @@ app.post('/save-draft', (req, res) => {
   );
 });
 
-  //----Queries from db ----\\
+//----Queries from db ----\\
 app.get('/travel-profiles', (req, res) => {
   const sql = `
     SELECT id, 
@@ -290,11 +290,159 @@ app.post('/logout', (req, res) => {
 
 
 //------------- routes for grant.js --------------- \\
+// Route to fetch a list of all grants associated with the current user, including member count
+app.get('/my-grants', async (req, res) => {
+  const userId = req.session.user_id;
 
-app.get('grant', (req, res)=>{
-  let sql =` SELECT from `
-  ;
+  if (!userId) {
+    return res.status(401).json({ error: 'User must be logged in to view grants.' });
+  }
+
+  try {
+    const allGrantsQuery = `
+        SELECT
+            b.budget_id,
+            b.title,
+            b.total_amount,
+            b.length,
+            b.created_at,
+            COUNT(m2.member_id) AS total_members
+        FROM
+            budgets b
+        INNER JOIN
+            members m1 ON b.budget_id = m1.budget_id
+        LEFT JOIN
+            members m2 ON b.budget_id = m2.budget_id
+        WHERE
+            m1.user_id = ?
+        GROUP BY
+            b.budget_id, b.title, b.total_amount, b.length, b.created_at
+        ORDER BY
+            b.created_at DESC;
+    `;
+
+    const grantList = await query(allGrantsQuery, [userId]);
+
+    res.json({ grants: grantList });
+
+  } catch (err) {
+    console.error('Error fetching user grants:', err);
+    res.status(500).json({ error: 'Failed to fetch your grants.' });
+  }
 });
+
+// Route to fetch details and ALL members for a single grant 
+app.get('/budget-members/:budget_id', async (req, res) => {
+  const budget_id = req.params.budget_id;
+  const userId = req.session.user_id;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'User must be logged in.' });
+  }
+
+  try {
+    // 1. Fetch Budget Details and Authorize User (using INNER JOIN and LIMIT 1)
+    const budgetDetailsQuery = `
+      SELECT
+          b.title,
+          b.total_amount,
+          b.length,
+          b.created_at
+      FROM
+          budgets b
+      INNER JOIN
+          members m ON b.budget_id = m.budget_id
+      WHERE
+          b.budget_id = ? AND m.user_id = ?
+      LIMIT 1;
+    `;
+
+    const budgetData = await query(budgetDetailsQuery, [budget_id, userId]);
+
+    if (budgetData.length === 0) {
+      return res.status(403).json({ error: 'Budget not found or unauthorized access.' });
+    }
+
+    const grantDetails = budgetData[0];
+
+    // 2. Query for Faculty Members (members table joins faculty table)
+    const facultyQuery = `
+      SELECT
+          f.name,
+          f.role,
+          m.member_type
+      FROM
+          members m
+      INNER JOIN
+          faculty f ON m.people_id = f.faculty_id
+      WHERE
+          m.budget_id = ? AND m.member_type = 'faculty'
+    `;
+
+    // 3. Query for Student Members (members table joins students table)
+    const studentQuery = `
+      SELECT
+          s.name,
+          'Student' AS role,
+          m.member_type
+      FROM
+          members m
+      INNER JOIN
+          students s ON m.people_id = s.student_id
+      WHERE
+          m.budget_id = ? AND m.member_type = 'student'
+    `;
+
+    // Execute both member queries concurrently
+    const [facultyMembers, studentMembers] = await Promise.all([
+      query(facultyQuery, [budget_id]),
+      query(studentQuery, [budget_id])
+    ]);
+
+    const allMembers = [...facultyMembers, ...studentMembers];
+
+    res.json({
+      details: grantDetails,
+      members: allMembers
+    });
+
+  } catch (err) {
+    console.error('Error fetching grant details and members:', err);
+    res.status(500).json({ error: 'Failed to fetch grant details and members.' });
+  }
+});
+
+// app.get('grant', async (req, res) => {
+//   if (req.session.user_id) {
+//     try {
+//       //query selects info of all grants created by a user
+//       const grantSQL = `
+//         SELECT
+//             b.title,
+//             b.total_amount,
+//             b.length,
+//             b.created_at
+//         FROM
+//             budgets b
+//         INNER JOIN
+//             members m ON b.budget_id = m.budget_id
+//         WHERE
+//             m.user_id = ?
+//         ORDER BY
+//             b.created_at DESC;
+//     `;
+//       const grantList = await query(grantSQL, req.session.user_id);
+
+
+//       res.json({ grants: grantList });
+//     } catch (err) {
+//       console.error('Error fetching user grants:', err);
+//       res.status(500).json({ error: 'Failed to fetch your grants.' });
+//     }
+//   } else {
+//     res.json({ loggedIn: false, message: "Log in to see your grants" })
+//   }
+// });
 
 // Start the server
 const PORT = 3000;
