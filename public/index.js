@@ -7,7 +7,8 @@ async function getJSON(url) { // async is is so the page doesn't freeze while fe
 }
 
 // Global variables
-  let budget_cost =0;
+let budget_cost = 0;
+let budget_len = 0;
 
 // In-memory selections
 const state = {
@@ -90,7 +91,6 @@ async function loadRefs() {
 
 }
 
-
 //Step 1 - Users, letting users add students into the DB
 document.getElementById('addStudent').addEventListener('click', async () => {
   const name = document.getElementById('Name').value.trim();
@@ -165,7 +165,7 @@ document.getElementById('addFaculty').addEventListener('click', async () => {
       alert(`${data.error}`);
     else
       await loadRefs();
-    
+
   } catch (err) {
     console.error(err);
   }
@@ -197,7 +197,6 @@ function renderPeople() { // This just shows the people on the page
     });
   });
 }
-
 
 //Step 3 - Travel, Stores the travel information inputted by user
 function addTravelLine() {
@@ -264,6 +263,7 @@ function addTuitionRow(createdStudent) {
 
   tbody.appendChild(tr);
 }
+
 // Step 4 - Tuition Fee Calculation
 document.addEventListener('click', async function (event) {
   // Only run on Calculate button
@@ -352,12 +352,12 @@ function addSubawards() {
   })
 }
 
-
 //Step 6 - Year Planning, Allows user to select how long the budget will be
-function planLength(salary, travel, tuition, subaward, total) {
+function planLength(salary, travel, tuition, subaward, fa, total) {
   const yearsSelect = document.getElementById("yearValue");
   const planningBody = document.getElementById("planningBody");
 
+  budget_len = yearsSelect.value;
   //intailize the first row of the table
   adjustRows(Number(yearsSelect.value));
 
@@ -377,7 +377,7 @@ function planLength(salary, travel, tuition, subaward, total) {
     for (let i = 0; i < years; i++) {
       const increasedTuition = tuition * Math.pow(1 + rate, i);
 
-      const newTotal = salary + travel + increasedTuition + subaward
+      const newTotal = salary + travel + increasedTuition + subaward + fa
 
       let row = document.createElement('tr');
       row.innerHTML =
@@ -393,7 +393,6 @@ function planLength(salary, travel, tuition, subaward, total) {
     }
   }
 }
-
 
 //Step 7 - Review Budget, Gets total from all the different categories and adds it together
 function calcTotals() { // need to seperate travel cost from f and A
@@ -440,13 +439,13 @@ function calcTotals() { // need to seperate travel cost from f and A
       <p><strong>Total:</strong> ${fmt(budget_cost)}</p>
     `;
 
-  planLength(salary, travel, tuition, subaward, total);
+  planLength(salary + fringe, travel, tuition, subaward, fa, budget_cost);
 }
 
 //Step 7 - saves the budget
 async function saveDraft() {
   const title = document.getElementById('title').value;
-  
+
   // get the fac and srudent ids from the post
   const facultyIDs = state.faculty.map(f => f.faculty_id);
   const studentIDs = state.students.map(s => s.student_id);
@@ -459,6 +458,7 @@ async function saveDraft() {
         // everything for budget
         title,
         budget_cost,
+        budget_len,
         // extra stuff for members
         facultyIDs,
         studentIDs
@@ -484,7 +484,7 @@ function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractio
 
 document.addEventListener('DOMContentLoaded', () => {
   addSubawards();
-  // planLength();
+  planLength();
   loadRefs().then(calcTotals);
   document.getElementById('addTravel').addEventListener('click', addTravelLine);
   //document.getElementById('recalc').addEventListener('click', calcTotals);
