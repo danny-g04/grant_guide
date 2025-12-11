@@ -95,7 +95,8 @@ CREATE TABLE
   IF NOT EXISTS budgets (
     budget_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
-    total_amount DECIMAL(65,2) NOT NULL,
+    total_amount DECIMAL(65, 2) NOT NULL,
+    length INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -105,7 +106,8 @@ CREATE TABLE
     user_id INT NOT NULL,
     budget_id INT NOT NULL,
     member_type ENUM ('faculty', 'student') NOT NULL,
-    /* added from the post in server.js*/ people_id INT NOT NULL,
+    /* added from the post in server.js*/
+    people_id INT NOT NULL,
     CONSTRAINT fk_members_budget FOREIGN KEY (budget_id) REFERENCES budgets (budget_id),
     CONSTRAINT fk_members_user FOREIGN KEY (user_id) REFERENCES users (user_id)
   );
