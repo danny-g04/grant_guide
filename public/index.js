@@ -8,7 +8,7 @@ async function getJSON(url) { // async is is so the page doesn't freeze while fe
 
 // Global variables
 let budget_cost = 0;
-let budget_len = 0;
+let budget_len = 1;
 
 // In-memory selections
 const state = {
@@ -369,12 +369,12 @@ function planLength(salary, travel, tuition, subaward, fa, total) {
   const yearsSelect = document.getElementById("yearValue");
   const planningBody = document.getElementById("planningBody");
 
-  budget_len = yearsSelect.value;
   //intailize the first row of the table
   adjustRows(Number(yearsSelect.value));
 
   //calls function to create a new table when a change happens
   yearsSelect.addEventListener("change", () => {
+    budget_len = yearsSelect.value;
     let years = Number(yearsSelect.value);
     adjustRows(years);
   })
@@ -486,6 +486,11 @@ async function saveDraft() {
     const response = await res.json();
 
     alert(`Grant Saved`);
+    state.people = [];
+    state.faculty = [];
+    state.students = [];
+
+    calcTotals();
 
   } catch (e) {
     alert('Error with saving the Grant: ' + e.message);

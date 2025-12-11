@@ -308,15 +308,13 @@ app.get('/my-grants', async (req, res) => {
             b.total_amount,
             b.length,
             b.created_at,
-            COUNT(m2.member_id) AS total_members
+            (SELECT COUNT(*) FROM members WHERE budget_id = b.budget_id) AS total_members 
         FROM
             budgets b
         INNER JOIN
-            members m1 ON b.budget_id = m1.budget_id
-        LEFT JOIN
-            members m2 ON b.budget_id = m2.budget_id
+            members m ON b.budget_id = m.budget_id 
         WHERE
-            m1.user_id = ?
+            m.user_id = ?
         GROUP BY
             b.budget_id, b.title, b.total_amount, b.length, b.created_at
         ORDER BY
@@ -414,7 +412,6 @@ app.get('/budget-members/:budget_id', async (req, res) => {
   }
 });
 
-// app.get('grant', async (req, res) => {
 //   if (req.session.user_id) {
 //     try {
 //       //query selects info of all grants created by a user
