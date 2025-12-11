@@ -6,6 +6,8 @@ async function getJSON(url) { // async is is so the page doesn't freeze while fe
   return res.json();
 }
 
+// Global variables
+  let budget_cost =0;
 
 // In-memory selections
 const state = {
@@ -428,14 +430,14 @@ function calcTotals() { // need to seperate travel cost from f and A
   const faBase = excludeTravelFromFA ? (direct - travel - tuition - subaward) : direct;
 
   const fa = faBase * state.faRate;
-  const total = direct + fa;
+  budget_cost = direct + fa;
 
   document.getElementById('totals').innerHTML = `
       <p><strong>Direct Costs:</strong> ${fmt(direct)}</p>
       <p> Salary: ${fmt(salary)} | Fringe: ${fmt(fringe)} | Travel: ${fmt(travel)} | Tuition: ${fmt(tuition)}| Subaward: ${fmt(subaward)}</p>
       <p><strong>F&A base:</strong> ${fmt(faBase)}  ${(state.faRate * 100).toFixed(1)}%</p>
       <p><strong>F&A:</strong> ${fmt(fa)}</p>
-      <p><strong>Total:</strong> ${fmt(total)}</p>
+      <p><strong>Total:</strong> ${fmt(budget_cost)}</p>
     `;
 
   planLength(salary, travel, tuition, subaward, total);
@@ -445,8 +447,6 @@ function calcTotals() { // need to seperate travel cost from f and A
 async function saveDraft() {
   const title = document.getElementById('title').value;
   
-  const user_id = 1; // hardcoded fo right now
-
   // get the fac and srudent ids from the post
   const facultyIDs = state.faculty.map(f => f.faculty_id);
   const studentIDs = state.students.map(s => s.student_id);
@@ -458,10 +458,8 @@ async function saveDraft() {
       body: JSON.stringify({
         // everything for budget
         title,
-        fa_rate: state.faRate,
-
+        budget_cost,
         // extra stuff for members
-        user_id,
         facultyIDs,
         studentIDs
       })
@@ -475,10 +473,10 @@ async function saveDraft() {
 
     const response = await res.json();
 
-    alert(`Draft Saved`);
+    alert(`Grant Saved`);
 
   } catch (e) {
-    alert('Error with saving the draft: ' + e.message);
+    alert('Error with saving the Grant: ' + e.message);
   }
 }
 
