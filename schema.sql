@@ -1,4 +1,3 @@
-
 CREATE DATABASE IF NOT EXISTS budget_path;
 
 USE budget_path;
@@ -48,7 +47,13 @@ VALUES
   (10000, 3.2, 50);
 
 INSERT INTO
-  tuition_fee_schedules (semester, residency_status, tuition_semester, fee_semester, annual_increase_semester)
+  tuition_fee_schedules (
+    semester,
+    residency_status,
+    tuition_semester,
+    fee_semester,
+    annual_increase_semester
+  )
 VALUES
   ('fall', 'in_state', 5000, 300, 0.03),
   ('fall', 'out_state', 10000, 600, 0.03),
@@ -71,7 +76,7 @@ CREATE TABLE
     faculty_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
     role ENUM ('PI', 'Co-PI', 'Staff') NOT NULL,
-    salary_id INT NOT NULL Default 3,
+    salary_id INT NOT NULL DEFAULT 3,
     CONSTRAINT fk_faculty_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id)
   );
 
@@ -90,20 +95,17 @@ CREATE TABLE
   IF NOT EXISTS budgets (
     budget_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
-    fa_rate DECIMAL(5, 4) NOT NULL,
+    total_amount DECIMAL(65,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
-  Create TABLE
-    IF NOT EXISTS members (
-      member_id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
-      budget_id INT NOT NULL,
-      member_type ENUM('faculty', 'student') NOT NULL, /* added from the post in server.js*/
-      people_id INT NOT NULL,
-
-      CONSTRAINT fk_members_budget FOREIGN KEY (budget_id) REFERENCES budgets (budget_id),
-      CONSTRAINT fk_members_user FOREIGN KEY (user_id) REFERENCES users (user_id)
-      
-
-    );
+CREATE TABLE
+  IF NOT EXISTS members (
+    member_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    budget_id INT NOT NULL,
+    member_type ENUM ('faculty', 'student') NOT NULL,
+    /* added from the post in server.js*/ people_id INT NOT NULL,
+    CONSTRAINT fk_members_budget FOREIGN KEY (budget_id) REFERENCES budgets (budget_id),
+    CONSTRAINT fk_members_user FOREIGN KEY (user_id) REFERENCES users (user_id)
+  );
