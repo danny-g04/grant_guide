@@ -406,6 +406,161 @@ function planLength(salary, travel, tuition, subaward, fa, total) {
   }
 }
 
+function exportXLSX() {
+  const rows = [];
+  const boldRows = new Set();
+
+  function addRow(row, bold = false) {
+    const idx = rows.length;
+    rows.push(row);
+    if (bold) boldRows.add(idx + 1); // Excel is 1-indexed
+  }
+
+
+  addRow(["Title:", document.getElementById("title")?.value || ""], true);
+  addRow(["Funding source:"]);
+  addRow([]);
+
+
+  addRow(["Personnel Compensation"], true);
+  addRow(["Name", "Role", "Effort", "Salary", "Fringe"], true);
+
+  let salaryTotal = 0;
+  let fringeTotal = 0;
+
+  state.people.forEach(p => {
+    const salary = Number(p.base) * (Number(p.effort) / 100);
+    const fringe = salary * (Number(p.fringe) / 100);
+    salaryTotal += salary;
+    fringeTotal += fringe;
+
+    addRow([p.name, p.role, `${p.effort}%`, salary, fringe]);
+  });
+
+  addRow(["Personnel Subtotal", "", "", salaryTotal, fringeTotal], true);
+  addRow([]);
+
+  addRow(["Travel"], true);
+  addRow(["Type", "People", "Days", "Description", "Total"], true);
+
+  let travelTotal = 0;
+
+  state.travelLines.forEach(t => {
+    const airfare = Number(t.airfare);
+    const perDiem = Number(t.perDiem);
+    const lodging = Number(t.lodging);
+    const days = Number(t.days);
+    const people = Number(t.people);
+
+    const perPerson = airfare + (perDiem + lodging) * days;
+    const total = perPerson * people;
+    travelTotal += total;
+
+    addRow([
+      t.type,
+      people,
+      days,
+      "Airfare + Per Diem + Lodging",
+      total
+    ]);
+  });
+
+  addRow(["Travel Subtotal", "", "", "", travelTotal], true);
+  addRow([]);
+
+  // ---------------- Tuition ----------------
+  addRow(["Graduate Student Tuition & Fees"], true);
+  addRow(["Student", "Semester", "Residency", "", "Amount"], true);
+
+  let tuitionTotal = 0;
+  (state.tuitionLines || []).forEach(t => {
+    tuitionTotal += Number(t.total);
+    addRow([t.studentId, t.semester, t.residency, "", t.total]);
+  });
+
+  addRow(["Tuition Subtotal", "", "", "", tuitionTotal], true);
+  addRow([]);
+
+  // ---------------- Subawards ----------------
+  addRow(["Consortia / Subawards"], true);
+
+  let subawardTotal = 0;
+  state.subAwards.forEach((amt, i) => {
+    subawardTotal += Number(amt);
+    addRow([`Subaward ${i + 1}`, "", "", "", amt]);
+  });
+
+  addRow(["Subaward Subtotal", "", "", "", subawardTotal], true);
+  addRow([]);
+
+  // ---------------- Totals ----------------
+  const direct =
+    salaryTotal + fringeTotal + travelTotal + tuitionTotal + subawardTotal;
+  const faBase = salaryTotal + fringeTotal;
+  const fa = faBase * state.faRate;
+  const totalProject = direct + fa;
+
+  addRow(["Total Direct Costs", "", "", "", direct], true);
+  addRow([`Indirect Costs (${(state.faRate * 100).toFixed(1)}%)`, "", "", "", fa], true);
+  addRow(["Total Project Cost", "", "", "", totalProject], true);
+  addRow([]);
+
+  // 5 year planning
+  addRow(["5-Year Budget Planning"], true);
+  addRow(["Year", "Salary", "Travel", "Tuition", "Subawards", "Total"], true);
+
+  const years = Number(document.getElementById("yearValue")?.value || 1);
+  const tuitionRate = 0.03;
+
+  for (let i = 0; i < years; i++) {
+    const yrTuition = tuitionTotal * Math.pow(1 + tuitionRate, i);
+    const yrTotal =
+      salaryTotal + fringeTotal + travelTotal + yrTuition + subawardTotal;
+
+    addRow([
+      i + 1,
+      salaryTotal + fringeTotal,
+      travelTotal,
+      yrTuition,
+      subawardTotal,
+      yrTotal
+    ]);
+  }
+
+ 
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  ws["!cols"] = [
+    { wch: 28 },
+    { wch: 14 },
+    { wch: 12 },
+    { wch: 30 },
+    { wch: 14 },
+    { wch: 14 }
+  ];
+
+  // Bold headers
+  boldRows.forEach(r => {
+    for (let c = 0; c < 6; c++) {
+      const cell = XLSX.utils.encode_cell({ r: r - 1, c });
+      if (!ws[cell]) continue;
+      ws[cell].s = { font: { bold: true } };
+    }
+  });
+
+
+  for (const cell in ws) {
+    if (!cell.match(/^[EF]\d+$/)) continue;
+    if (typeof ws[cell]?.v === "number") {
+      ws[cell].z = "$#,##0.00";
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Budget");
+  XLSX.writeFile(wb, "Grant_Budget.xlsx");
+}
+
 //Step 7 - Review Budget, Gets total from all the different categories and adds it together
 function calcTotals() { // need to seperate travel cost from f and A
   const n = x => Number(x) || 0;
@@ -491,7 +646,6 @@ async function saveDraft() {
     alert('Error with saving the Grant: ' + e.message);
   }
 }
-
 function fmt(n) { return `$${(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`; }
 
 document.addEventListener('DOMContentLoaded', () => {
