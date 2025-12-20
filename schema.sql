@@ -78,9 +78,8 @@ CREATE TABLE
     user_id INT NOT NULL,
     role ENUM ('PI', 'Co-PI', 'Staff') NOT NULL,
     salary_id INT NOT NULL DEFAULT 3,
-    CONSTRAINT fk_faculty_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id)
-    CONSTRAINT fk_faculty_user FOREIGN KEY (user_id) REFERENCES users(user_id);
-
+    CONSTRAINT fk_faculty_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id),
+    CONSTRAINT fk_faculty_user FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
 
 CREATE TABLE
@@ -92,9 +91,8 @@ CREATE TABLE
     tuition_id INT NOT NULL,
     user_id INT NOT NULL,
     CONSTRAINT fk_students_salary FOREIGN KEY (salary_id) REFERENCES salary (salary_id),
-    CONSTRAINT fk_students_tuition FOREIGN KEY (tuition_id) REFERENCES tuition_fee_schedules (tuition_id)
-    CONSTRAINT fk_students_user FOREIGN KEY (user_id) REFERENCES users(user_id);
-
+    CONSTRAINT fk_students_tuition FOREIGN KEY (tuition_id) REFERENCES tuition_fee_schedules (tuition_id),
+    CONSTRAINT fk_students_user FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
 
 CREATE TABLE
